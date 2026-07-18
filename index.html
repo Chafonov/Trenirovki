@@ -387,7 +387,202 @@ const store = {
 
 /* ================= ДАННЫЕ ================= */
 
-const BASE_EXERCISES = [["Грудь", ["Жим лёжа", "Жим гантелей лёжа", "Жим в наклоне", "Разводка гантелей", "Отжимания"]], ["Спина", ["Становая тяга", "Тяга штанги в наклоне", "Подтягивания", "Тяга верхнего блока", "Горизонтальная тяга", "Тяга гантели одной рукой"]], ["Ноги", ["Приседания со штангой", "Жим ногами", "Румынская тяга", "Выпады", "Разгибания ног", "Сгибания ног", "Подъёмы на носки"]], ["Плечи", ["Жим стоя", "Жим гантелей сидя", "Махи в стороны", "Тяга к подбородку"]], ["Руки", ["Сгибания на бицепс", "Молотки", "Французский жим", "Разгибания на блоке", "Брусья"]], ["Корпус", ["Скручивания", "Планка", "Гиперэкстензия"]]];
+let LANG = "ru";
+const BASE_EXERCISES_RU = [["Грудь", ["Жим лёжа", "Жим гантелей лёжа", "Жим в наклоне", "Разводка гантелей", "Отжимания"]], ["Спина", ["Становая тяга", "Тяга штанги в наклоне", "Подтягивания", "Тяга верхнего блока", "Горизонтальная тяга", "Тяга гантели одной рукой"]], ["Ноги", ["Приседания со штангой", "Жим ногами", "Румынская тяга", "Выпады", "Разгибания ног", "Сгибания ног", "Подъёмы на носки"]], ["Плечи", ["Жим стоя", "Жим гантелей сидя", "Махи в стороны", "Тяга к подбородку"]], ["Руки", ["Сгибания на бицепс", "Молотки", "Французский жим", "Разгибания на блоке", "Брусья"]], ["Корпус", ["Скручивания", "Планка", "Гиперэкстензия"]]];
+const BASE_EXERCISES_EN = [["Chest", ["Bench press", "Dumbbell bench press", "Incline press", "Dumbbell fly", "Push-ups"]], ["Back", ["Deadlift", "Barbell row", "Pull-ups", "Lat pulldown", "Seated row", "One-arm dumbbell row"]], ["Legs", ["Barbell squat", "Leg press", "Romanian deadlift", "Lunges", "Leg extension", "Leg curl", "Calf raises"]], ["Shoulders", ["Overhead press", "Seated dumbbell press", "Lateral raises", "Upright row"]], ["Arms", ["Biceps curl", "Hammer curl", "Skull crusher", "Cable pushdown", "Dips"]], ["Core", ["Crunches", "Plank", "Back extension"]]];
+const getBase = () => LANG === "en" ? BASE_EXERCISES_EN : BASE_EXERCISES_RU;
+const MSHORT = {
+  ru: ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"],
+  en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+};
+const MFULL = {
+  ru: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+  en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+};
+const T = {
+  ru: {
+    locale: "ru-RU",
+    today: "Сегодня",
+    yesterday: "Вчера",
+    hi: "Привет",
+    statMonth: "в этом месяце",
+    statTotal: "всего",
+    statAvg: "мин в среднем",
+    statsEmpty: "Здесь появится статистика после первой тренировки.",
+    start: "Начать тренировку",
+    lastWorkout: "Последняя тренировка",
+    exAbbr: "упр.",
+    setsWord: "подходов",
+    kg: "кг",
+    reps: "повт",
+    history: "История",
+    histEmpty: "Пока пусто. Первая тренировка появится здесь.",
+    del: "Удалить",
+    delConfirm: "Нажми ещё раз — удалить",
+    progress: "Прогресс",
+    progEmpty: "Проведи пару тренировок — здесь появятся диаграмма по месяцам и график роста весов.",
+    modeWorkouts: "Тренировки",
+    modeExercises: "Упражнения",
+    workoutsAbbr: "трен.",
+    noMonth: "В этом месяце тренировок не было.",
+    record: "рекорд",
+    lastLabel: "последний",
+    workoutsCount: "тренировок",
+    oneMore: "Ещё одна тренировка — и появится линия прогресса",
+    done: "Готово",
+    fillSet: "Заполни хотя бы один подход",
+    addFirst1: "Добавь первое упражнение —",
+    addFirst2: "и поехали.",
+    setBtn: "Подход",
+    removeSet: "Убрать подход",
+    exercise: "Упражнение",
+    cancelWorkout: "Отменить тренировку",
+    cancelConfirm: "Точно отменить? Данные пропадут",
+    tooBig: "Эта тренировка слишком большая для облака Telegram. Попробуй меньше упражнений за раз.",
+    colPrev: "Прошлый",
+    inProgress: "Идёт тренировка",
+    saved: "ТРЕНИРОВКА ЗАПИСАНА",
+    fEx: "упражн.",
+    fSets: "подходов",
+    fVol: "кг тоннаж",
+    great: "Отлично",
+    searchPh: "Поиск или новое название",
+    create: "Создать",
+    nothingFound: "Ничего не найдено",
+    customGroup: "Свои",
+    tabHome: "Главная",
+    tabHist: "История",
+    tabProg: "Прогресс",
+    menu: "Меню",
+    language: "Язык",
+    feedback: "Обратная связь"
+  },
+  en: {
+    locale: "en-US",
+    today: "Today",
+    yesterday: "Yesterday",
+    hi: "Hi",
+    statMonth: "this month",
+    statTotal: "total",
+    statAvg: "avg min",
+    statsEmpty: "Stats will appear here after your first workout.",
+    start: "Start workout",
+    lastWorkout: "Last workout",
+    exAbbr: "ex",
+    setsWord: "sets",
+    kg: "kg",
+    reps: "reps",
+    history: "History",
+    histEmpty: "Empty for now. Your first workout will show up here.",
+    del: "Delete",
+    delConfirm: "Tap again to delete",
+    progress: "Progress",
+    progEmpty: "Do a few workouts — a monthly chart and a weight-progress graph will appear here.",
+    modeWorkouts: "Workouts",
+    modeExercises: "Exercises",
+    workoutsAbbr: "wk",
+    noMonth: "No workouts this month.",
+    record: "record",
+    lastLabel: "last",
+    workoutsCount: "workouts",
+    oneMore: "One more workout and a progress line will appear",
+    done: "Done",
+    fillSet: "Fill in at least one set",
+    addFirst1: "Add your first exercise —",
+    addFirst2: "let's go.",
+    setBtn: "Set",
+    removeSet: "Remove set",
+    exercise: "Exercise",
+    cancelWorkout: "Cancel workout",
+    cancelConfirm: "Cancel for sure? Data will be lost",
+    tooBig: "This workout is too large for Telegram cloud. Try fewer exercises at once.",
+    colPrev: "Prev",
+    inProgress: "Workout in progress",
+    saved: "WORKOUT SAVED",
+    fEx: "exercises",
+    fSets: "sets",
+    fVol: "kg volume",
+    great: "Great",
+    searchPh: "Search or new name",
+    create: "Create",
+    nothingFound: "Nothing found",
+    customGroup: "Custom",
+    tabHome: "Home",
+    tabHist: "History",
+    tabProg: "Progress",
+    menu: "Menu",
+    language: "Language",
+    feedback: "Feedback"
+  }
+};
+const tr = () => T[LANG];
+
+/* ================= ФЛАГИ ================= */
+
+const FlagRU = ({
+  s = 88
+}) => /*#__PURE__*/React.createElement("svg", {
+  width: s,
+  height: s * 2 / 3,
+  viewBox: "0 0 3 2",
+  style: {
+    display: "block",
+    borderRadius: 8
+  }
+}, /*#__PURE__*/React.createElement("rect", {
+  width: "3",
+  height: "2",
+  fill: "#fff"
+}), /*#__PURE__*/React.createElement("rect", {
+  y: "0.667",
+  width: "3",
+  height: "0.667",
+  fill: "#0039A6"
+}), /*#__PURE__*/React.createElement("rect", {
+  y: "1.333",
+  width: "3",
+  height: "0.667",
+  fill: "#D52B1E"
+}));
+const FlagGB = ({
+  s = 88
+}) => /*#__PURE__*/React.createElement("svg", {
+  width: s,
+  height: s / 2,
+  viewBox: "0 0 60 30",
+  style: {
+    display: "block",
+    borderRadius: 8
+  }
+}, /*#__PURE__*/React.createElement("clipPath", {
+  id: "gbclip"
+}, /*#__PURE__*/React.createElement("rect", {
+  width: "60",
+  height: "30",
+  rx: "0"
+})), /*#__PURE__*/React.createElement("g", {
+  clipPath: "url(#gbclip)"
+}, /*#__PURE__*/React.createElement("rect", {
+  width: "60",
+  height: "30",
+  fill: "#012169"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M0,0 L60,30 M60,0 L0,30",
+  stroke: "#fff",
+  strokeWidth: "6"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M0,0 L60,30 M60,0 L0,30",
+  stroke: "#C8102E",
+  strokeWidth: "3.5"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M30,0 V30 M0,15 H60",
+  stroke: "#fff",
+  strokeWidth: "10"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M30,0 V30 M0,15 H60",
+  stroke: "#C8102E",
+  strokeWidth: "6"
+})));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const pad = n => String(n).padStart(2, "0");
 const num = v => {
@@ -404,6 +599,7 @@ function fmtClock(s) {
 function fmtDur(s) {
   const h = Math.floor(s / 3600),
     m = Math.round(s % 3600 / 60);
+  if (LANG === "en") return h > 0 ? `${h}h ${m}m` : `${Math.max(1, m)} min`;
   return h > 0 ? `${h} ч ${m} мин` : `${Math.max(1, m)} мин`;
 }
 function fmtDate(iso) {
@@ -412,14 +608,14 @@ function fmtDate(iso) {
   const dd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const tt = new Date(t.getFullYear(), t.getMonth(), t.getDate());
   const diff = Math.round((tt - dd) / 864e5);
-  if (diff === 0) return "Сегодня";
-  if (diff === 1) return "Вчера";
-  return d.toLocaleDateString("ru-RU", {
+  if (diff === 0) return tr().today;
+  if (diff === 1) return tr().yesterday;
+  return d.toLocaleDateString(tr().locale, {
     day: "numeric",
     month: "long"
   });
 }
-const fmtShort = iso => new Date(iso).toLocaleDateString("ru-RU", {
+const fmtShort = iso => new Date(iso).toLocaleDateString(tr().locale, {
   day: "numeric",
   month: "numeric"
 });
@@ -555,6 +751,24 @@ const Ic = {
     strokeLinejoin: "round"
   }, /*#__PURE__*/React.createElement("path", {
     d: "M5 9l7 7 7-7"
+  })),
+  dots: c => /*#__PURE__*/React.createElement("svg", {
+    width: "22",
+    height: "22",
+    viewBox: "0 0 24 24",
+    fill: c
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "5",
+    cy: "12",
+    r: "2"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "2"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "19",
+    cy: "12",
+    r: "2"
   }))
 };
 
@@ -658,8 +872,6 @@ function Chart({
 /* ================= ДИАГРАММА ПО МЕСЯЦАМ ================= */
 /* Столбик = месяц, высота = число тренировок. Тап открывает список сессий. */
 
-const MONTHS_SHORT = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
-const MONTHS_FULL = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
 function MonthsChart({
   months,
   sel,
@@ -754,7 +966,7 @@ function MonthsChart({
       textAnchor: "middle",
       fontSize: "10",
       fill: on ? "#fff" : "#7A7A7A"
-    }, MONTHS_SHORT[m.month]));
+    }, MSHORT[LANG][m.month]));
   }));
 }
 
@@ -774,12 +986,12 @@ function Picker({
   }, []);
   const all = useMemo(() => {
     const arr = [];
-    BASE_EXERCISES.forEach(([g, items]) => items.forEach(n => arr.push({
+    getBase().forEach(([g, items]) => items.forEach(n => arr.push({
       group: g,
       name: n
     })));
     custom.forEach(n => arr.push({
-      group: "Свои",
+      group: tr().customGroup,
       name: n
     }));
     return arr;
@@ -823,7 +1035,7 @@ function Picker({
       fontWeight: 700,
       flex: 1
     }
-  }, "\u0423\u043F\u0440\u0430\u0436\u043D\u0435\u043D\u0438\u0435"), /*#__PURE__*/React.createElement("button", {
+  }, tr().exercise), /*#__PURE__*/React.createElement("button", {
     className: "press",
     onClick: onClose,
     style: {
@@ -835,7 +1047,7 @@ function Picker({
       alignItems: "center",
       justifyContent: "center"
     },
-    "aria-label": "\u0417\u0430\u043A\u0440\u044B\u0442\u044C"
+    "aria-label": "\xD7"
   }, Ic.x("#fff"))), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "0 20px 14px"
@@ -849,7 +1061,7 @@ function Picker({
       height: 48,
       borderRadius: 14
     },
-    placeholder: "\u041F\u043E\u0438\u0441\u043A \u0438\u043B\u0438 \u043D\u043E\u0432\u043E\u0435 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0435",
+    placeholder: tr().searchPh,
     value: q,
     onChange: e => setQ(e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
@@ -884,7 +1096,7 @@ function Picker({
       justifyContent: "center",
       flexShrink: 0
     }
-  }, Ic.plus("#0A0A0A", 16)), "\u0421\u043E\u0437\u0434\u0430\u0442\u044C \xAB", q.trim(), "\xBB"), groups.map(g => /*#__PURE__*/React.createElement("div", {
+  }, Ic.plus("#0A0A0A", 16)), tr().create, " \u201C", q.trim(), "\u201D"), groups.map(g => /*#__PURE__*/React.createElement("div", {
     key: g.name
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -920,7 +1132,7 @@ function Picker({
       textAlign: "center",
       fontSize: 15
     }
-  }, "\u041D\u0438\u0447\u0435\u0433\u043E \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E")));
+  }, tr().nothingFound)));
 }
 
 /* ================= ПРИЛОЖЕНИЕ ================= */
@@ -944,6 +1156,21 @@ function App() {
   const [selEx, setSelEx] = useState(null);
   const [progMode, setProgMode] = useState("months");
   const [selMonth, setSelMonth] = useState(null);
+  const [lang, setLang] = useState("ru");
+  const [menu, setMenu] = useState(false);
+  LANG = lang;
+  const t = T[lang];
+  function changeLang(l) {
+    LANG = l;
+    setLang(l);
+    store.set("lang", l);
+    haptic.light();
+  }
+  function openFeedback() {
+    try {
+      if (tg && tg.openTelegramLink) tg.openTelegramLink("https://t.me/Chafonov");else window.open("https://t.me/Chafonov", "_blank");
+    } catch (e) {}
+  }
 
   /* ---- загрузка ---- */
   useEffect(() => {
@@ -966,6 +1193,11 @@ function App() {
         const exRaw = await store.get("ex");
         const exercises = exRaw ? JSON.parse(exRaw) : [];
         const draftRaw = await store.get("draft");
+        const langRaw = await store.get("lang");
+        if (langRaw === "en" || langRaw === "ru") {
+          LANG = langRaw;
+          setLang(langRaw);
+        }
         setData({
           workouts,
           exercises
@@ -998,7 +1230,7 @@ function App() {
     const bb = tg ? tg.BackButton : null;
     if (!bb) return;
     let action = null;
-    if (finish) action = () => setFinish(null);else if (picker) action = () => setPicker(false);else if (workout && wOpen) action = () => setWOpen(false);
+    if (finish) action = () => setFinish(null);else if (picker) action = () => setPicker(false);else if (menu) action = () => setMenu(false);else if (workout && wOpen) action = () => setWOpen(false);
     if (action) {
       try {
         bb.onClick(action);
@@ -1014,7 +1246,7 @@ function App() {
     try {
       bb.hide();
     } catch (e) {}
-  }, [finish, picker, workout, wOpen]);
+  }, [finish, picker, menu, workout, wOpen]);
 
   /* ---- таймер ---- */
   useEffect(() => {
@@ -1148,7 +1380,7 @@ function App() {
       }))
     })).filter(e => e.sets.length > 0);
     if (clean.length === 0) {
-      setNotice("Заполни хотя бы один подход");
+      setNotice(t.fillSet);
       haptic.warn();
       return;
     }
@@ -1162,7 +1394,7 @@ function App() {
     const json = JSON.stringify(wk);
     if (inTG && json.length > 4096) {
       try {
-        tg.showAlert("Эта тренировка слишком большая для облака Telegram. Попробуй меньше упражнений за раз.");
+        tg.showAlert(t.tooBig);
       } catch (e) {}
       return;
     }
@@ -1206,12 +1438,17 @@ function App() {
 
   /* ---- производные ---- */
   const stats = useMemo(() => {
-    const week = data.workouts.filter(w => Date.now() - new Date(w.date).getTime() < 7 * 864e5).length;
-    const sets = data.workouts.reduce((a, w) => a + w.entries.reduce((b, e) => b + e.sets.length, 0), 0);
+    const now = new Date();
+    const month = data.workouts.filter(w => {
+      const d = new Date(w.date);
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    }).length;
+    const totalDur = data.workouts.reduce((a, w) => a + (w.duration || 0), 0);
+    const avgMin = data.workouts.length ? Math.round(totalDur / data.workouts.length / 60) : 0;
     return {
-      week,
+      month,
       total: data.workouts.length,
-      sets
+      avgMin
     };
   }, [data.workouts]);
   const exList = useMemo(() => {
@@ -1275,7 +1512,7 @@ function App() {
     });
     return {
       pts,
-      unit: weighted ? "кг" : "повт",
+      weighted,
       record: Math.max(...pts.map(p => p.v)),
       last: pts[pts.length - 1].v
     };
@@ -1315,14 +1552,35 @@ function App() {
     }, /*#__PURE__*/React.createElement("div", {
       className: "fadeUp",
       style: {
+        display: "flex",
+        alignItems: "center",
+        paddingTop: 12
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "press",
+      onClick: () => setMenu(true),
+      "aria-label": t.menu,
+      style: {
+        width: 40,
+        height: 40,
+        borderRadius: 999,
+        background: "#161616",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginLeft: -2
+      }
+    }, Ic.dots("#fff"))), /*#__PURE__*/React.createElement("div", {
+      className: "fadeUp",
+      style: {
         fontSize: 11,
         fontWeight: 700,
         letterSpacing: "0.14em",
         color: "#9A9A9A",
         textTransform: "uppercase",
-        paddingTop: 22
+        paddingTop: 12
       }
-    }, new Date().toLocaleDateString("ru-RU", {
+    }, new Date().toLocaleDateString(t.locale, {
       weekday: "long",
       day: "numeric",
       month: "long"
@@ -1335,7 +1593,7 @@ function App() {
         margin: "14px 0 24px",
         animationDelay: "50ms"
       }
-    }, "\u041F\u0440\u0438\u0432\u0435\u0442, ", USER_NAME), data.workouts.length > 0 ? /*#__PURE__*/React.createElement("div", {
+    }, t.hi, ", ", USER_NAME), data.workouts.length > 0 ? /*#__PURE__*/React.createElement("div", {
       className: "fadeUp",
       style: {
         display: "flex",
@@ -1345,27 +1603,52 @@ function App() {
         marginBottom: 16,
         animationDelay: "100ms"
       }
-    }, [[stats.week, "за 7 дней"], [stats.total, "всего"], [stats.sets, "подходов"]].map(([v, l], i) => /*#__PURE__*/React.createElement("div", {
-      key: i,
-      style: {
+    }, [{
+      v: stats.month,
+      l: t.statMonth,
+      go: true
+    }, {
+      v: stats.total,
+      l: t.statTotal
+    }, {
+      v: stats.avgMin,
+      l: t.statAvg
+    }].map((c, i) => {
+      const inner = /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+        className: "num",
+        style: {
+          fontSize: 26,
+          fontWeight: 800,
+          letterSpacing: "-0.02em"
+        }
+      }, c.v), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 12,
+          color: "#8A8A8A",
+          marginTop: 2
+        }
+      }, c.l, c.go ? " ›" : ""));
+      const st = {
         flex: 1,
         textAlign: "center",
         borderLeft: i ? "1px solid #262626" : "none"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "num",
-      style: {
-        fontSize: 26,
-        fontWeight: 800,
-        letterSpacing: "-0.02em"
-      }
-    }, v), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 12,
-        color: "#8A8A8A",
-        marginTop: 2
-      }
-    }, l)))) : /*#__PURE__*/React.createElement("p", {
+      };
+      return c.go ? /*#__PURE__*/React.createElement("button", {
+        key: i,
+        className: "press",
+        onClick: () => {
+          const now = new Date();
+          const idx = months.findIndex(m => m.year === now.getFullYear() && m.month === now.getMonth());
+          setSelMonth(idx >= 0 ? idx : months.length - 1);
+          setProgMode("months");
+          setTab("prog");
+        },
+        style: st
+      }, inner) : /*#__PURE__*/React.createElement("div", {
+        key: i,
+        style: st
+      }, inner);
+    })) : /*#__PURE__*/React.createElement("p", {
       className: "fadeUp",
       style: {
         color: "#9A9A9A",
@@ -1374,7 +1657,7 @@ function App() {
         marginBottom: 16,
         animationDelay: "100ms"
       }
-    }, "\u0417\u0434\u0435\u0441\u044C \u043F\u043E\u044F\u0432\u0438\u0442\u0441\u044F \u0441\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043A\u0430 \u043F\u043E\u0441\u043B\u0435 \u043F\u0435\u0440\u0432\u043E\u0439 \u0442\u0440\u0435\u043D\u0438\u0440\u043E\u0432\u043A\u0438."), /*#__PURE__*/React.createElement("button", {
+    }, t.statsEmpty), /*#__PURE__*/React.createElement("button", {
       className: "press fadeUp",
       onClick: startWorkout,
       style: {
@@ -1391,7 +1674,7 @@ function App() {
         justifyContent: "center",
         gap: 10
       }
-    }, Ic.plus("#0A0A0A", 18), " \u041D\u0430\u0447\u0430\u0442\u044C \u0442\u0440\u0435\u043D\u0438\u0440\u043E\u0432\u043A\u0443"), lastW && /*#__PURE__*/React.createElement("div", {
+    }, Ic.plus("#0A0A0A", 18), " ", t.start), lastW && /*#__PURE__*/React.createElement("div", {
       className: "fadeUp",
       style: {
         marginTop: 28,
@@ -1406,7 +1689,7 @@ function App() {
         textTransform: "uppercase",
         marginBottom: 10
       }
-    }, "\u041F\u043E\u0441\u043B\u0435\u0434\u043D\u044F\u044F \u0442\u0440\u0435\u043D\u0438\u0440\u043E\u0432\u043A\u0430"), /*#__PURE__*/React.createElement("button", {
+    }, t.lastWorkout), /*#__PURE__*/React.createElement("button", {
       className: "press",
       onClick: () => {
         setTab("hist");
@@ -1439,7 +1722,7 @@ function App() {
         marginTop: 6
       },
       className: "num"
-    }, lastW.entries.length, " \u0443\u043F\u0440. \xB7 ", wSets(lastW), " \u043F\u043E\u0434\u0445\u043E\u0434\u043E\u0432", wVolume(lastW) > 0 ? ` · ${fmtKg(wVolume(lastW))} кг` : ""))));
+    }, lastW.entries.length, " ", t.exAbbr, " \xB7 ", wSets(lastW), " ", t.setsWord, wVolume(lastW) > 0 ? ` · ${fmtKg(wVolume(lastW))} ${t.kg}` : ""))));
   };
 
   /* ---- история ---- */
@@ -1455,14 +1738,14 @@ function App() {
       letterSpacing: "-0.03em",
       margin: "20px 0 20px"
     }
-  }, "\u0418\u0441\u0442\u043E\u0440\u0438\u044F"), data.workouts.length === 0 && /*#__PURE__*/React.createElement("p", {
+  }, t.history), data.workouts.length === 0 && /*#__PURE__*/React.createElement("p", {
     className: "fadeUp",
     style: {
       color: "#9A9A9A",
       fontSize: 15,
       lineHeight: 1.5
     }
-  }, "\u041F\u043E\u043A\u0430 \u043F\u0443\u0441\u0442\u043E. \u041F\u0435\u0440\u0432\u0430\u044F \u0442\u0440\u0435\u043D\u0438\u0440\u043E\u0432\u043A\u0430 \u043F\u043E\u044F\u0432\u0438\u0442\u0441\u044F \u0437\u0434\u0435\u0441\u044C."), data.workouts.map((w, i) => {
+  }, t.histEmpty), data.workouts.map((w, i) => {
     const open = expanded === w.id;
     return /*#__PURE__*/React.createElement("div", {
       key: w.id,
@@ -1502,7 +1785,7 @@ function App() {
         marginTop: 6
       },
       className: "num"
-    }, w.entries.length, " \u0443\u043F\u0440. \xB7 ", wSets(w), " \u043F\u043E\u0434\u0445\u043E\u0434\u043E\u0432", wVolume(w) > 0 ? ` · ${fmtKg(wVolume(w))} кг` : "")), open && /*#__PURE__*/React.createElement("div", {
+    }, w.entries.length, " ", t.exAbbr, " \xB7 ", wSets(w), " ", t.setsWord, wVolume(w) > 0 ? ` · ${fmtKg(wVolume(w))} ${t.kg}` : "")), open && /*#__PURE__*/React.createElement("div", {
       className: "fadeIn",
       style: {
         padding: "0 18px 16px"
@@ -1539,7 +1822,7 @@ function App() {
         marginTop: 4,
         textDecoration: delWk === w.id ? "underline" : "none"
       }
-    }, delWk === w.id ? "Нажми ещё раз — удалить" : "Удалить")));
+    }, delWk === w.id ? t.delConfirm : t.del)));
   }));
 
   /* ---- прогресс: режим "по месяцам" ---- */
@@ -1577,19 +1860,19 @@ function App() {
         fontWeight: 800,
         letterSpacing: "-0.02em"
       }
-    }, MONTHS_FULL[m.month], " ", m.year), /*#__PURE__*/React.createElement("div", {
+    }, MFULL[lang][m.month], " ", m.year), /*#__PURE__*/React.createElement("div", {
       className: "num",
       style: {
         fontSize: 13,
         color: "#8A8A8A"
       }
-    }, m.items.length, " \u0442\u0440\u0435\u043D.")), m.items.length === 0 ? /*#__PURE__*/React.createElement("p", {
+    }, m.items.length, " ", t.workoutsAbbr)), m.items.length === 0 ? /*#__PURE__*/React.createElement("p", {
       style: {
         color: "#8A8A8A",
         fontSize: 14,
         lineHeight: 1.5
       }
-    }, "\u0412 \u044D\u0442\u043E\u043C \u043C\u0435\u0441\u044F\u0446\u0435 \u0442\u0440\u0435\u043D\u0438\u0440\u043E\u0432\u043E\u043A \u043D\u0435 \u0431\u044B\u043B\u043E.") : m.items.map(w => /*#__PURE__*/React.createElement("button", {
+    }, t.noMonth) : m.items.map(w => /*#__PURE__*/React.createElement("button", {
       key: w.id,
       className: "press",
       onClick: () => {
@@ -1619,7 +1902,7 @@ function App() {
         color: "#8A8A8A",
         marginTop: 3
       }
-    }, w.entries.length, " \u0443\u043F\u0440 \xB7 ", wSets(w), " \u043F\u043E\u0434\u0445\u043E\u0434\u043E\u0432")), /*#__PURE__*/React.createElement("div", {
+    }, w.entries.length, " ", t.exAbbr, " \xB7 ", wSets(w), " ", t.setsWord)), /*#__PURE__*/React.createElement("div", {
       className: "num",
       style: {
         fontSize: 15,
@@ -1632,72 +1915,75 @@ function App() {
   };
 
   /* ---- прогресс: режим "по упражнениям" ---- */
-  const renderExercises = () => /*#__PURE__*/React.createElement("div", {
-    key: "ex"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "hideScroll fadeUp",
-    style: {
-      display: "flex",
-      gap: 8,
-      overflowX: "auto",
-      paddingBottom: 6,
-      marginBottom: 16
-    }
-  }, exList.map(n => /*#__PURE__*/React.createElement("button", {
-    key: n,
-    className: `chip press ${n === activeEx ? "on" : ""}`,
-    onClick: () => setSelEx(n)
-  }, n))), progress && /*#__PURE__*/React.createElement("div", {
-    key: activeEx
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "fadeUp",
-    style: {
-      background: "#161616",
-      borderRadius: 20,
-      padding: "16px 10px 10px"
-    }
-  }, /*#__PURE__*/React.createElement(Chart, {
-    pts: progress.pts,
-    unit: progress.unit
-  })), progress.pts.length === 1 && /*#__PURE__*/React.createElement("p", {
-    className: "fadeIn",
-    style: {
-      fontSize: 13,
-      color: "#8A8A8A",
-      marginTop: 10,
-      textAlign: "center"
-    }
-  }, "\u0415\u0449\u0451 \u043E\u0434\u043D\u0430 \u0442\u0440\u0435\u043D\u0438\u0440\u043E\u0432\u043A\u0430 \u2014 \u0438 \u043F\u043E\u044F\u0432\u0438\u0442\u0441\u044F \u043B\u0438\u043D\u0438\u044F \u043F\u0440\u043E\u0433\u0440\u0435\u0441\u0441\u0430"), /*#__PURE__*/React.createElement("div", {
-    className: "fadeUp",
-    style: {
-      display: "flex",
-      marginTop: 16,
-      background: "#161616",
-      borderRadius: 20,
-      padding: "16px 8px",
-      animationDelay: "80ms"
-    }
-  }, [[`${fmtKg(progress.record)}`, `рекорд, ${progress.unit}`], [`${fmtKg(progress.last)}`, `последний, ${progress.unit}`], [progress.pts.length, "тренировок"]].map(([v, l], i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
-    style: {
-      flex: 1,
-      textAlign: "center",
-      borderLeft: i ? "1px solid #262626" : "none"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "num",
-    style: {
-      fontSize: 22,
-      fontWeight: 800,
-      letterSpacing: "-0.02em"
-    }
-  }, v), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: "#8A8A8A",
-      marginTop: 2
-    }
-  }, l))))));
+  const renderExercises = () => {
+    const unit = progress ? progress.weighted ? t.kg : t.reps : "";
+    return /*#__PURE__*/React.createElement("div", {
+      key: "ex"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hideScroll fadeUp",
+      style: {
+        display: "flex",
+        gap: 8,
+        overflowX: "auto",
+        paddingBottom: 6,
+        marginBottom: 16
+      }
+    }, exList.map(n => /*#__PURE__*/React.createElement("button", {
+      key: n,
+      className: `chip press ${n === activeEx ? "on" : ""}`,
+      onClick: () => setSelEx(n)
+    }, n))), progress && /*#__PURE__*/React.createElement("div", {
+      key: activeEx
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "fadeUp",
+      style: {
+        background: "#161616",
+        borderRadius: 20,
+        padding: "16px 10px 10px"
+      }
+    }, /*#__PURE__*/React.createElement(Chart, {
+      pts: progress.pts,
+      unit: unit
+    })), progress.pts.length === 1 && /*#__PURE__*/React.createElement("p", {
+      className: "fadeIn",
+      style: {
+        fontSize: 13,
+        color: "#8A8A8A",
+        marginTop: 10,
+        textAlign: "center"
+      }
+    }, t.oneMore), /*#__PURE__*/React.createElement("div", {
+      className: "fadeUp",
+      style: {
+        display: "flex",
+        marginTop: 16,
+        background: "#161616",
+        borderRadius: 20,
+        padding: "16px 8px",
+        animationDelay: "80ms"
+      }
+    }, [[`${fmtKg(progress.record)}`, `${t.record}, ${unit}`], [`${fmtKg(progress.last)}`, `${t.lastLabel}, ${unit}`], [progress.pts.length, t.workoutsCount]].map(([v, l], i) => /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        flex: 1,
+        textAlign: "center",
+        borderLeft: i ? "1px solid #262626" : "none"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "num",
+      style: {
+        fontSize: 22,
+        fontWeight: 800,
+        letterSpacing: "-0.02em"
+      }
+    }, v), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "#8A8A8A",
+        marginTop: 2
+      }
+    }, l))))));
+  };
 
   /* ---- прогресс ---- */
   const renderProg = () => /*#__PURE__*/React.createElement("div", {
@@ -1712,21 +1998,21 @@ function App() {
       letterSpacing: "-0.03em",
       margin: "20px 0 20px"
     }
-  }, "\u041F\u0440\u043E\u0433\u0440\u0435\u0441\u0441"), data.workouts.length === 0 ? /*#__PURE__*/React.createElement("p", {
+  }, t.progress), data.workouts.length === 0 ? /*#__PURE__*/React.createElement("p", {
     className: "fadeUp",
     style: {
       color: "#9A9A9A",
       fontSize: 15,
       lineHeight: 1.5
     }
-  }, "\u041F\u0440\u043E\u0432\u0435\u0434\u0438 \u043F\u0430\u0440\u0443 \u0442\u0440\u0435\u043D\u0438\u0440\u043E\u0432\u043E\u043A \u2014 \u0437\u0434\u0435\u0441\u044C \u043F\u043E\u044F\u0432\u044F\u0442\u0441\u044F \u0434\u0438\u0430\u0433\u0440\u0430\u043C\u043C\u0430 \u043F\u043E \u043C\u0435\u0441\u044F\u0446\u0430\u043C \u0438 \u0433\u0440\u0430\u0444\u0438\u043A \u0440\u043E\u0441\u0442\u0430 \u0432\u0435\u0441\u043E\u0432.") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, t.progEmpty) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "fadeUp",
     style: {
       display: "flex",
       gap: 8,
       marginBottom: 16
     }
-  }, [["months", "Тренировки"], ["exercises", "Упражнения"]].map(([id, label]) => /*#__PURE__*/React.createElement("button", {
+  }, [["months", t.modeWorkouts], ["exercises", t.modeExercises]].map(([id, label]) => /*#__PURE__*/React.createElement("button", {
     key: id,
     className: "press",
     onClick: () => setProgMode(id),
@@ -1741,6 +2027,114 @@ function App() {
       transition: "background .2s, color .2s"
     }
   }, label))), progMode === "months" ? renderMonths() : renderExercises()));
+
+  /* ---- меню ---- */
+  const renderMenu = () => /*#__PURE__*/React.createElement("div", {
+    className: "sheet",
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 65,
+      background: "#0A0A0A",
+      color: "#fff",
+      display: "flex",
+      flexDirection: "column",
+      paddingTop: "env(safe-area-inset-top)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "18px 20px 8px",
+      display: "flex",
+      alignItems: "center",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 21,
+      fontWeight: 700,
+      flex: 1
+    }
+  }, t.menu), /*#__PURE__*/React.createElement("button", {
+    className: "press",
+    onClick: () => setMenu(false),
+    "aria-label": "\xD7",
+    style: {
+      width: 38,
+      height: 38,
+      borderRadius: 999,
+      background: "#161616",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    }
+  }, Ic.x("#fff"))), /*#__PURE__*/React.createElement("div", {
+    className: "hideScroll",
+    style: {
+      flex: 1,
+      overflowY: "auto",
+      padding: "12px 20px 20px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: "0.12em",
+      textTransform: "uppercase",
+      color: "#6E6E6E",
+      marginBottom: 14
+    }
+  }, t.language), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 12
+    }
+  }, [["ru", FlagRU], ["en", FlagGB]].map(([id, Flag]) => {
+    const on = lang === id;
+    return /*#__PURE__*/React.createElement("button", {
+      key: id,
+      className: "press",
+      onClick: () => changeLang(id),
+      style: {
+        flex: 1,
+        background: on ? "#1E1E1E" : "#141414",
+        border: on ? "2px solid #fff" : "2px solid #242424",
+        borderRadius: 18,
+        padding: "18px 0",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 10,
+        transition: "border-color .2s, background .2s"
+      }
+    }, /*#__PURE__*/React.createElement(Flag, {
+      s: 92
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 14,
+        fontWeight: 700,
+        color: on ? "#fff" : "#8A8A8A"
+      }
+    }, id === "ru" ? "Русский" : "English"));
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 20px calc(18px + env(safe-area-inset-bottom))",
+      borderTop: "1px solid #1C1C1C",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "press",
+    onClick: openFeedback,
+    style: {
+      fontSize: 14,
+      color: "#8A8A8A",
+      fontWeight: 500
+    }
+  }, t.feedback, ": ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#fff",
+      fontWeight: 700
+    }
+  }, "@Chafonov"))));
 
   /* ---- активная тренировка ---- */
   const renderWorkout = () => /*#__PURE__*/React.createElement("div", {
@@ -1797,7 +2191,7 @@ function App() {
       fontWeight: 700,
       flexShrink: 0
     }
-  }, "\u0413\u043E\u0442\u043E\u0432\u043E")), notice && /*#__PURE__*/React.createElement("div", {
+  }, t.done)), notice && /*#__PURE__*/React.createElement("div", {
     className: "fadeIn",
     style: {
       textAlign: "center",
@@ -1825,7 +2219,7 @@ function App() {
       marginTop: 60,
       lineHeight: 1.5
     }
-  }, "\u0414\u043E\u0431\u0430\u0432\u044C \u043F\u0435\u0440\u0432\u043E\u0435 \u0443\u043F\u0440\u0430\u0436\u043D\u0435\u043D\u0438\u0435 \u2014", /*#__PURE__*/React.createElement("br", null), "\u0438 \u043F\u043E\u0435\u0445\u0430\u043B\u0438."), workout.entries.map(e => /*#__PURE__*/React.createElement("div", {
+  }, t.addFirst1, /*#__PURE__*/React.createElement("br", null), t.addFirst2), workout.entries.map(e => /*#__PURE__*/React.createElement("div", {
     key: e.id,
     className: "fadeUp",
     style: {
@@ -1849,7 +2243,7 @@ function App() {
   }, e.name), /*#__PURE__*/React.createElement("button", {
     className: "pressS press",
     onClick: () => removeEntry(e.id),
-    "aria-label": "\u0423\u0431\u0440\u0430\u0442\u044C \u0443\u043F\u0440\u0430\u0436\u043D\u0435\u043D\u0438\u0435",
+    "aria-label": "\xD7",
     style: {
       width: 30,
       height: 30,
@@ -1869,15 +2263,15 @@ function App() {
       color: "#6E6E6E",
       textTransform: "uppercase"
     }
-  }, /*#__PURE__*/React.createElement("div", null, "\u2116"), /*#__PURE__*/React.createElement("div", null, "\u041F\u0440\u043E\u0448\u043B\u044B\u0439"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", null, "\u2116"), /*#__PURE__*/React.createElement("div", null, t.colPrev), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center"
     }
-  }, "\u043A\u0433"), /*#__PURE__*/React.createElement("div", {
+  }, t.kg), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center"
     }
-  }, "\u043F\u043E\u0432\u0442"), /*#__PURE__*/React.createElement("div", null)), e.sets.map((s, si) => /*#__PURE__*/React.createElement("div", {
+  }, t.reps), /*#__PURE__*/React.createElement("div", null)), e.sets.map((s, si) => /*#__PURE__*/React.createElement("div", {
     key: s.id,
     className: `row ${s.done ? "done" : ""}`
   }, /*#__PURE__*/React.createElement("div", {
@@ -1902,18 +2296,18 @@ function App() {
     placeholder: s.pw !== "" ? String(s.pw) : "0",
     value: s.w,
     onChange: ev => setField(e.id, s.id, "w", ev.target.value),
-    "aria-label": "\u0412\u0435\u0441"
+    "aria-label": t.kg
   }), /*#__PURE__*/React.createElement("input", {
     className: "fld fldD num",
     inputMode: "numeric",
     placeholder: s.pr !== "" ? String(s.pr) : "0",
     value: s.r,
     onChange: ev => setField(e.id, s.id, "r", ev.target.value),
-    "aria-label": "\u041F\u043E\u0432\u0442\u043E\u0440\u044B"
+    "aria-label": t.reps
   }), /*#__PURE__*/React.createElement("button", {
     className: `chk pressS press ${s.done ? "on" : ""}`,
     onClick: () => toggleDone(e.id, s.id),
-    "aria-label": "\u0412\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u043E"
+    "aria-label": "\u2713"
   }, s.done && Ic.check("#fff")))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
@@ -1933,7 +2327,7 @@ function App() {
       alignItems: "center",
       gap: 6
     }
-  }, Ic.plus("#fff", 14), " \u041F\u043E\u0434\u0445\u043E\u0434"), e.sets.length > 1 && /*#__PURE__*/React.createElement("button", {
+  }, Ic.plus("#fff", 14), " ", t.setBtn), e.sets.length > 1 && /*#__PURE__*/React.createElement("button", {
     className: "press",
     onClick: () => popSet(e.id),
     style: {
@@ -1942,7 +2336,7 @@ function App() {
       color: "#6E6E6E",
       height: 34
     }
-  }, "\u0423\u0431\u0440\u0430\u0442\u044C \u043F\u043E\u0434\u0445\u043E\u0434"))))), /*#__PURE__*/React.createElement("div", {
+  }, t.removeSet))))), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "12px 20px calc(16px + env(safe-area-inset-bottom))",
       borderTop: "1px solid #1C1C1C"
@@ -1963,7 +2357,7 @@ function App() {
       justifyContent: "center",
       gap: 8
     }
-  }, Ic.plus("#0A0A0A", 16), " \u0423\u043F\u0440\u0430\u0436\u043D\u0435\u043D\u0438\u0435"), /*#__PURE__*/React.createElement("button", {
+  }, Ic.plus("#0A0A0A", 16), " ", t.exercise), /*#__PURE__*/React.createElement("button", {
     onClick: cancelWorkout,
     style: {
       width: "100%",
@@ -1974,7 +2368,7 @@ function App() {
       color: cancelArm ? "#fff" : "#6E6E6E",
       textDecoration: cancelArm ? "underline" : "none"
     }
-  }, cancelArm ? "Точно отменить? Данные пропадут" : "Отменить тренировку")));
+  }, cancelArm ? t.cancelConfirm : t.cancelWorkout)));
 
   /* ---- итог ---- */
   const renderFinish = () => /*#__PURE__*/React.createElement("div", {
@@ -1999,7 +2393,7 @@ function App() {
       letterSpacing: "0.16em",
       color: "#9A9A9A"
     }
-  }, "\u0422\u0420\u0415\u041D\u0418\u0420\u041E\u0412\u041A\u0410 \u0417\u0410\u041F\u0418\u0421\u0410\u041D\u0410"), /*#__PURE__*/React.createElement("div", {
+  }, t.saved), /*#__PURE__*/React.createElement("div", {
     className: "pop num",
     style: {
       fontSize: 58,
@@ -2015,7 +2409,7 @@ function App() {
       gap: 28,
       animationDelay: "200ms"
     }
-  }, [[finish.ex, "упражн."], [finish.sets, "подходов"], ...(finish.vol > 0 ? [[fmtKg(finish.vol), "кг тоннаж"]] : [])].map(([v, l], i) => /*#__PURE__*/React.createElement("div", {
+  }, [[finish.ex, t.fEx], [finish.sets, t.fSets], ...(finish.vol > 0 ? [[fmtKg(finish.vol), t.fVol]] : [])].map(([v, l], i) => /*#__PURE__*/React.createElement("div", {
     key: i
   }, /*#__PURE__*/React.createElement("div", {
     className: "num",
@@ -2043,10 +2437,10 @@ function App() {
       fontWeight: 700,
       animationDelay: "300ms"
     }
-  }, "\u041E\u0442\u043B\u0438\u0447\u043D\u043E"));
+  }, t.great));
 
   /* ---- каркас ---- */
-  const TABS = [["home", "Главная", Ic.home], ["hist", "История", Ic.hist], ["prog", "Прогресс", Ic.chart]];
+  const TABS = [["home", t.tabHome, Ic.home], ["hist", t.tabHist, Ic.hist], ["prog", t.tabProg, Ic.chart]];
   return /*#__PURE__*/React.createElement("div", {
     className: "root",
     style: {
@@ -2063,7 +2457,7 @@ function App() {
       overflowY: "auto",
       paddingBottom: 20
     },
-    key: tab
+    key: tab + lang
   }, tab === "home" && renderHome(), tab === "hist" && renderHist(), tab === "prog" && renderProg()), workout && !wOpen && /*#__PURE__*/React.createElement("button", {
     className: "press pop",
     onClick: () => setWOpen(true),
@@ -2084,7 +2478,7 @@ function App() {
       fontSize: 15,
       fontWeight: 700
     }
-  }, "\u0418\u0434\u0451\u0442 \u0442\u0440\u0435\u043D\u0438\u0440\u043E\u0432\u043A\u0430"), /*#__PURE__*/React.createElement("span", {
+  }, t.inProgress), /*#__PURE__*/React.createElement("span", {
     className: "num",
     style: {
       fontSize: 15,
@@ -2117,7 +2511,7 @@ function App() {
       fontWeight: 600,
       color: tab === id ? "#fff" : "#5A5A5A"
     }
-  }, label)))), workout && wOpen && renderWorkout(), picker && workout && /*#__PURE__*/React.createElement(Picker, {
+  }, label)))), menu && renderMenu(), workout && wOpen && renderWorkout(), picker && workout && /*#__PURE__*/React.createElement(Picker, {
     custom: data.exercises,
     onPick: addExercise,
     onCreate: createExercise,
