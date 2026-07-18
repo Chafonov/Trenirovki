@@ -367,16 +367,22 @@ const haptic = {
 /* В Telegram — CloudStorage (синхронизация между устройствами).
    В обычном браузере — localStorage (для теста).                    */
 
-const P = fn => new Promise(res => fn(res));
+const P = (fn, dflt) => new Promise(res => {
+  try {
+    fn(res);
+  } catch (e) {
+    res(dflt);
+  }
+});
 const store = {
-  get: k => inTG ? P(r => cs.getItem(k, (e, v) => r(e ? null : v || null))) : Promise.resolve(localStorage.getItem(k)),
-  getMany: ks => inTG ? P(r => cs.getItems(ks, (e, m) => r(e ? {} : m || {}))) : Promise.resolve(ks.reduce((o, k) => {
+  get: k => inTG ? P(r => cs.getItem(k, (e, v) => r(e ? null : v || null)), null) : Promise.resolve(localStorage.getItem(k)),
+  getMany: ks => inTG ? P(r => cs.getItems(ks, (e, m) => r(e ? {} : m || {})), {}) : Promise.resolve(ks.reduce((o, k) => {
     o[k] = localStorage.getItem(k);
     return o;
   }, {})),
-  set: (k, v) => inTG ? P(r => cs.setItem(k, v, (e, ok) => r(!e && ok))) : Promise.resolve((localStorage.setItem(k, v), true)),
-  del: k => inTG ? P(r => cs.removeItem(k, () => r(true))) : Promise.resolve((localStorage.removeItem(k), true)),
-  keys: () => inTG ? P(r => cs.getKeys((e, ks) => r(e ? [] : ks || []))) : Promise.resolve(Object.keys(localStorage))
+  set: (k, v) => inTG ? P(r => cs.setItem(k, v, (e, ok) => r(!e && ok)), false) : Promise.resolve((localStorage.setItem(k, v), true)),
+  del: k => inTG ? P(r => cs.removeItem(k, () => r(true)), false) : Promise.resolve((localStorage.removeItem(k), true)),
+  keys: () => inTG ? P(r => cs.getKeys((e, ks) => r(e ? [] : ks || [])), []) : Promise.resolve(Object.keys(localStorage))
 };
 
 /* ================= ДАННЫЕ ================= */
@@ -839,7 +845,7 @@ function App() {
     (async () => {
       try {
         const keys = await store.keys();
-        const wKeys = keys.filter(k => k.indexOf("w:") === 0);
+        const wKeys = keys.filter(k => k.indexOf("w_") === 0);
         let workouts = [];
         if (wKeys.length) {
           const map = await store.getMany(wKeys);
@@ -1055,7 +1061,7 @@ function App() {
       } catch (e) {}
       return;
     }
-    await store.set("w:" + wk.id, json);
+    await store.set("w_" + wk.id, json);
     store.del("draft");
     setData(d => ({
       ...d,
@@ -1085,7 +1091,7 @@ function App() {
     setCancelArm(false);
   }
   function deleteWorkout(id) {
-    store.del("w:" + id);
+    store.del("w_" + id);
     setData(d => ({
       ...d,
       workouts: d.workouts.filter(x => x.id !== id)
