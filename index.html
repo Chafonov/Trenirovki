@@ -388,8 +388,8 @@ const store = {
 /* ================= ДАННЫЕ ================= */
 
 let LANG = "ru";
-const BASE_EXERCISES_RU = [["Грудь", ["Жим лёжа", "Жим гантелей лёжа", "Жим в наклоне", "Разводка гантелей", "Отжимания"]], ["Спина", ["Становая тяга", "Тяга штанги в наклоне", "Подтягивания", "Тяга верхнего блока", "Горизонтальная тяга", "Тяга гантели одной рукой"]], ["Ноги", ["Приседания со штангой", "Жим ногами", "Румынская тяга", "Выпады", "Разгибания ног", "Сгибания ног", "Подъёмы на носки"]], ["Плечи", ["Жим стоя", "Жим гантелей сидя", "Махи в стороны", "Тяга к подбородку"]], ["Руки", ["Сгибания на бицепс", "Молотки", "Французский жим", "Разгибания на блоке", "Брусья"]], ["Корпус", ["Скручивания", "Планка", "Гиперэкстензия"]]];
-const BASE_EXERCISES_EN = [["Chest", ["Bench press", "Dumbbell bench press", "Incline press", "Dumbbell fly", "Push-ups"]], ["Back", ["Deadlift", "Barbell row", "Pull-ups", "Lat pulldown", "Seated row", "One-arm dumbbell row"]], ["Legs", ["Barbell squat", "Leg press", "Romanian deadlift", "Lunges", "Leg extension", "Leg curl", "Calf raises"]], ["Shoulders", ["Overhead press", "Seated dumbbell press", "Lateral raises", "Upright row"]], ["Arms", ["Biceps curl", "Hammer curl", "Skull crusher", "Cable pushdown", "Dips"]], ["Core", ["Crunches", "Plank", "Back extension"]]];
+const BASE_EXERCISES_RU = [["Популярные", ["Жим лёжа", "Приседания со штангой", "Становая тяга", "Отжимания", "Подтягивания", "Жим стоя", "Махи в стороны", "Сгибания на бицепс", "Планка"]], ["Грудь", ["Жим гантелей лёжа", "Жим в наклоне", "Разводка гантелей"]], ["Спина", ["Тяга штанги в наклоне", "Тяга верхнего блока", "Горизонтальная тяга", "Тяга гантели одной рукой"]], ["Ноги", ["Жим ногами", "Румынская тяга", "Выпады", "Разгибания ног", "Сгибания ног", "Подъёмы на носки"]], ["Плечи", ["Жим гантелей сидя", "Тяга к подбородку"]], ["Руки", ["Молотки", "Французский жим", "Разгибания на блоке", "Брусья"]], ["Корпус", ["Скручивания", "Гиперэкстензия"]]];
+const BASE_EXERCISES_EN = [["Popular", ["Bench press", "Barbell squat", "Deadlift", "Push-ups", "Pull-ups", "Overhead press", "Lateral raises", "Biceps curl", "Plank"]], ["Chest", ["Dumbbell bench press", "Incline press", "Dumbbell fly"]], ["Back", ["Barbell row", "Lat pulldown", "Seated row", "One-arm dumbbell row"]], ["Legs", ["Leg press", "Romanian deadlift", "Lunges", "Leg extension", "Leg curl", "Calf raises"]], ["Shoulders", ["Seated dumbbell press", "Upright row"]], ["Arms", ["Hammer curl", "Skull crusher", "Cable pushdown", "Dips"]], ["Core", ["Crunches", "Back extension"]]];
 const getBase = () => LANG === "en" ? BASE_EXERCISES_EN : BASE_EXERCISES_RU;
 const MSHORT = {
   ru: ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"],
@@ -455,7 +455,22 @@ const T = {
     tabProg: "Прогресс",
     menu: "Меню",
     language: "Язык",
-    feedback: "Обратная связь"
+    feedback: "Обратная связь",
+    createTpl: "Создать шаблон",
+    templates: "Шаблоны",
+    newTpl: "Новый шаблон",
+    tplNamePh: "Название шаблона",
+    saveTpl: "Сохранить шаблон",
+    defaultTplName: "Шаблон",
+    chooseTpl: "Выбери шаблон",
+    emptyWorkout: "Пустая тренировка",
+    tplEmpty: "Добавь хотя бы одно упражнение с повторами",
+    tplTooBig: "Шаблон слишком большой для облака Telegram. Убери часть упражнений.",
+    myEx: "Мои упражнения",
+    addExPh: "Новое упражнение",
+    add: "Добавить",
+    noCustom: "Своих упражнений пока нет. Добавь — и они появятся в списке при выборе упражнения.",
+    exists: "Уже есть в списке"
   },
   en: {
     locale: "en-US",
@@ -512,7 +527,22 @@ const T = {
     tabProg: "Progress",
     menu: "Menu",
     language: "Language",
-    feedback: "Feedback"
+    feedback: "Feedback",
+    createTpl: "Create template",
+    templates: "Templates",
+    newTpl: "New template",
+    tplNamePh: "Template name",
+    saveTpl: "Save template",
+    defaultTplName: "Template",
+    chooseTpl: "Choose a template",
+    emptyWorkout: "Empty workout",
+    tplEmpty: "Add at least one exercise with reps",
+    tplTooBig: "This template is too large for Telegram cloud. Remove some exercises.",
+    myEx: "My exercises",
+    addExPh: "New exercise",
+    add: "Add",
+    noCustom: "No custom exercises yet. Add some — they will appear in the exercise picker.",
+    exists: "Already in the list"
   }
 };
 const tr = () => T[LANG];
@@ -1016,7 +1046,7 @@ function Picker({
     style: {
       position: "fixed",
       inset: 0,
-      zIndex: 60,
+      zIndex: 72,
       background: "#0A0A0A",
       color: "#fff",
       display: "flex",
@@ -1146,11 +1176,19 @@ function App() {
   const [tab, setTab] = useState("home");
   const [workout, setWorkout] = useState(null);
   const [wOpen, setWOpen] = useState(false);
-  const [picker, setPicker] = useState(false);
+  const [pickerCtx, setPickerCtx] = useState(null); // null | 'workout' | 'template'
   const [elapsed, setElapsed] = useState(0);
   const [finish, setFinish] = useState(null);
   const [notice, setNotice] = useState("");
   const [cancelArm, setCancelArm] = useState(false);
+  const [tpls, setTpls] = useState([]);
+  const [tplScreen, setTplScreen] = useState(null); // null | {mode:'list'} | {mode:'edit', draft}
+  const [startSheet, setStartSheet] = useState(false);
+  const [delTpl, setDelTpl] = useState(null);
+  const [exMgr, setExMgr] = useState(false);
+  const [newExName, setNewExName] = useState("");
+  const [delEx, setDelEx] = useState(null);
+  const [exNotice, setExNotice] = useState("");
   const [expanded, setExpanded] = useState(null);
   const [delWk, setDelWk] = useState(null);
   const [selEx, setSelEx] = useState(null);
@@ -1190,6 +1228,20 @@ function App() {
           }).filter(Boolean);
           workouts.sort((a, b) => new Date(b.date) - new Date(a.date));
         }
+        const tKeys = keys.filter(k => k.indexOf("t_") === 0);
+        let templates = [];
+        if (tKeys.length) {
+          const tmap = await store.getMany(tKeys);
+          templates = tKeys.map(k => {
+            try {
+              return JSON.parse(tmap[k]);
+            } catch (e) {
+              return null;
+            }
+          }).filter(Boolean);
+          templates.sort((a, b) => a.id > b.id ? 1 : -1);
+        }
+        setTpls(templates);
         const exRaw = await store.get("ex");
         const exercises = exRaw ? JSON.parse(exRaw) : [];
         const draftRaw = await store.get("draft");
@@ -1230,7 +1282,9 @@ function App() {
     const bb = tg ? tg.BackButton : null;
     if (!bb) return;
     let action = null;
-    if (finish) action = () => setFinish(null);else if (picker) action = () => setPicker(false);else if (menu) action = () => setMenu(false);else if (workout && wOpen) action = () => setWOpen(false);
+    if (finish) action = () => setFinish(null);else if (pickerCtx) action = () => setPickerCtx(null);else if (exMgr) action = () => setExMgr(false);else if (menu) action = () => setMenu(false);else if (tplScreen && tplScreen.mode === "edit") action = () => setTplScreen(tpls.length ? {
+      mode: "list"
+    } : null);else if (tplScreen) action = () => setTplScreen(null);else if (startSheet) action = () => setStartSheet(false);else if (workout && wOpen) action = () => setWOpen(false);
     if (action) {
       try {
         bb.onClick(action);
@@ -1246,7 +1300,7 @@ function App() {
     try {
       bb.hide();
     } catch (e) {}
-  }, [finish, picker, menu, workout, wOpen]);
+  }, [finish, pickerCtx, exMgr, menu, tplScreen, startSheet, workout, wOpen, tpls.length]);
 
   /* ---- таймер ---- */
   useEffect(() => {
@@ -1274,6 +1328,24 @@ function App() {
       return () => clearTimeout(t);
     }
   }, [delWk]);
+  useEffect(() => {
+    if (delTpl) {
+      const t = setTimeout(() => setDelTpl(null), 2600);
+      return () => clearTimeout(t);
+    }
+  }, [delTpl]);
+  useEffect(() => {
+    if (delEx) {
+      const t = setTimeout(() => setDelEx(null), 2600);
+      return () => clearTimeout(t);
+    }
+  }, [delEx]);
+  useEffect(() => {
+    if (exNotice) {
+      const t = setTimeout(() => setExNotice(""), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [exNotice]);
 
   /* ---- тренировка ---- */
   function lastSetsFor(name) {
@@ -1283,14 +1355,49 @@ function App() {
   }
   function startWorkout() {
     haptic.light();
+    setStartSheet(false);
     setWorkout({
       startedAt: Date.now(),
       entries: []
     });
     setWOpen(true);
-    setPicker(true);
+    setPickerCtx("workout");
+  }
+  function startFromTpl(tp) {
+    haptic.light();
+    setStartSheet(false);
+    const entries = tp.entries.map(e => {
+      const prev = lastSetsFor(e.name) || [];
+      return {
+        id: uid(),
+        name: e.name,
+        sets: e.sets.map((s, i) => ({
+          id: uid(),
+          w: s.w > 0 ? String(s.w) : "",
+          r: s.r > 0 ? String(s.r) : "",
+          done: false,
+          pw: prev[i] ? prev[i].w : "",
+          pr: prev[i] ? prev[i].r : ""
+        }))
+      };
+    });
+    setWorkout({
+      startedAt: Date.now(),
+      entries
+    });
+    setWOpen(true);
+  }
+  function onStartPress() {
+    if (tpls.length > 0) {
+      setStartSheet(true);
+      haptic.light();
+    } else startWorkout();
   }
   function addExercise(name) {
+    if (pickerCtx === "template") {
+      addTplExercise(name);
+      return;
+    }
     const prev = lastSetsFor(name);
     const sets = (prev && prev.length ? prev : [null]).map(p => ({
       id: uid(),
@@ -1308,7 +1415,7 @@ function App() {
         sets
       }]
     }));
-    setPicker(false);
+    setPickerCtx(null);
   }
   function createExercise(name) {
     if (!data.exercises.includes(name)) {
@@ -1320,6 +1427,163 @@ function App() {
       store.set("ex", JSON.stringify(next));
     }
     addExercise(name);
+  }
+
+  /* ---- шаблоны ---- */
+  function onTplPress() {
+    haptic.light();
+    if (tpls.length > 0) setTplScreen({
+      mode: "list"
+    });else setTplScreen({
+      mode: "edit",
+      draft: {
+        id: null,
+        name: "",
+        entries: []
+      }
+    });
+  }
+  function editTpl(tp) {
+    setTplScreen({
+      mode: "edit",
+      draft: {
+        id: tp.id,
+        name: tp.name,
+        entries: tp.entries.map(e => ({
+          id: uid(),
+          name: e.name,
+          sets: e.sets.map(s => ({
+            id: uid(),
+            w: s.w > 0 ? String(s.w) : "",
+            r: s.r > 0 ? String(s.r) : ""
+          }))
+        }))
+      }
+    });
+  }
+  const mutTpl = fn => setTplScreen(sc => sc && sc.mode === "edit" ? {
+    ...sc,
+    draft: fn(sc.draft)
+  } : sc);
+  function addTplExercise(name) {
+    const prev = lastSetsFor(name);
+    const sets = (prev && prev.length ? prev : [null]).map(p => ({
+      id: uid(),
+      w: p && p.w > 0 ? String(p.w) : "",
+      r: p && p.r > 0 ? String(p.r) : ""
+    }));
+    mutTpl(d => ({
+      ...d,
+      entries: [...d.entries, {
+        id: uid(),
+        name,
+        sets
+      }]
+    }));
+    setPickerCtx(null);
+  }
+  const mutTplEntry = (eid, fn) => mutTpl(d => ({
+    ...d,
+    entries: d.entries.map(e => e.id === eid ? fn(e) : e)
+  }));
+  const setTplField = (eid, sid, f, v) => mutTplEntry(eid, e => ({
+    ...e,
+    sets: e.sets.map(s => s.id === sid ? {
+      ...s,
+      [f]: v
+    } : s)
+  }));
+  const addTplSet = eid => mutTplEntry(eid, e => {
+    const l = e.sets[e.sets.length - 1];
+    return {
+      ...e,
+      sets: [...e.sets, {
+        id: uid(),
+        w: l ? l.w : "",
+        r: l ? l.r : ""
+      }]
+    };
+  });
+  const popTplSet = eid => mutTplEntry(eid, e => ({
+    ...e,
+    sets: e.sets.slice(0, -1)
+  }));
+  const removeTplEntry = eid => mutTpl(d => ({
+    ...d,
+    entries: d.entries.filter(e => e.id !== eid)
+  }));
+  async function saveTpl() {
+    const d = tplScreen.draft;
+    const clean = d.entries.map(e => ({
+      name: e.name,
+      sets: e.sets.filter(s => num(s.r) > 0).map(s => ({
+        w: num(s.w),
+        r: num(s.r)
+      }))
+    })).filter(e => e.sets.length > 0);
+    if (clean.length === 0) {
+      setNotice(t.tplEmpty);
+      haptic.warn();
+      return;
+    }
+    const name = d.name.trim() || `${t.defaultTplName} ${tpls.length + 1}`;
+    const tp = {
+      id: d.id || uid(),
+      name,
+      entries: clean
+    };
+    const json = JSON.stringify(tp);
+    if (inTG && json.length > 4096) {
+      try {
+        tg.showAlert(t.tplTooBig);
+      } catch (e) {}
+      return;
+    }
+    await store.set("t_" + tp.id, json);
+    setTpls(arr => {
+      const rest = arr.filter(x => x.id !== tp.id);
+      return [...rest, tp].sort((a, b) => a.id > b.id ? 1 : -1);
+    });
+    haptic.success();
+    setTplScreen({
+      mode: "list"
+    });
+  }
+  function deleteTpl(id) {
+    store.del("t_" + id);
+    setTpls(arr => arr.filter(x => x.id !== id));
+    setDelTpl(null);
+  }
+
+  /* ---- свои упражнения ---- */
+  function addCustomEx() {
+    const name = newExName.trim();
+    if (!name) return;
+    const allNames = [];
+    getBase().forEach(([g, items]) => items.forEach(n => allNames.push(n.toLowerCase())));
+    data.exercises.forEach(n => allNames.push(n.toLowerCase()));
+    if (allNames.includes(name.toLowerCase())) {
+      setExNotice(t.exists);
+      haptic.warn();
+      return;
+    }
+    const next = [...data.exercises, name];
+    setData(dd => ({
+      ...dd,
+      exercises: next
+    }));
+    store.set("ex", JSON.stringify(next));
+    setNewExName("");
+    haptic.light();
+  }
+  function deleteCustomEx(name) {
+    const next = data.exercises.filter(n => n !== name);
+    setData(dd => ({
+      ...dd,
+      exercises: next
+    }));
+    store.set("ex", JSON.stringify(next));
+    setDelEx(null);
   }
   const mutEntry = (eid, fn) => setWorkout(wk => ({
     ...wk,
@@ -1657,24 +1921,43 @@ function App() {
         marginBottom: 16,
         animationDelay: "100ms"
       }
-    }, t.statsEmpty), /*#__PURE__*/React.createElement("button", {
-      className: "press fadeUp",
-      onClick: startWorkout,
+    }, t.statsEmpty), /*#__PURE__*/React.createElement("div", {
+      className: "fadeUp",
       style: {
-        width: "100%",
+        display: "flex",
+        gap: 10,
+        animationDelay: "150ms"
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "press",
+      onClick: onStartPress,
+      style: {
+        flex: 1.25,
         height: 60,
         borderRadius: 20,
         background: "#fff",
         color: "#0A0A0A",
-        fontSize: 17,
+        fontSize: 15,
         fontWeight: 700,
-        animationDelay: "150ms",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 10
+        lineHeight: 1.15,
+        padding: "0 10px"
       }
-    }, Ic.plus("#0A0A0A", 18), " ", t.start), lastW && /*#__PURE__*/React.createElement("div", {
+    }, t.start), /*#__PURE__*/React.createElement("button", {
+      className: "press",
+      onClick: onTplPress,
+      style: {
+        flex: 1,
+        height: 60,
+        borderRadius: 20,
+        background: "#161616",
+        color: "#fff",
+        fontSize: 15,
+        fontWeight: 700,
+        lineHeight: 1.15,
+        padding: "0 10px",
+        border: "1px solid #262626"
+      }
+    }, t.createTpl)), lastW && /*#__PURE__*/React.createElement("div", {
       className: "fadeUp",
       style: {
         marginTop: 28,
@@ -2115,7 +2398,32 @@ function App() {
         color: on ? "#fff" : "#8A8A8A"
       }
     }, id === "ru" ? "Русский" : "English"));
-  }))), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("button", {
+    className: "press",
+    onClick: () => {
+      setExMgr(true);
+      haptic.light();
+    },
+    style: {
+      width: "100%",
+      marginTop: 22,
+      background: "#161616",
+      borderRadius: 18,
+      padding: "16px 18px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      fontSize: 16,
+      fontWeight: 700,
+      textAlign: "left"
+    }
+  }, t.myEx, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#6E6E6E",
+      fontWeight: 400,
+      fontSize: 20
+    }
+  }, "\u203A"))), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "14px 20px calc(18px + env(safe-area-inset-bottom))",
       borderTop: "1px solid #1C1C1C",
@@ -2135,6 +2443,562 @@ function App() {
       fontWeight: 700
     }
   }, "@Chafonov"))));
+
+  /* ---- мои упражнения ---- */
+  const renderExMgr = () => /*#__PURE__*/React.createElement("div", {
+    className: "sheet",
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 66,
+      background: "#0A0A0A",
+      color: "#fff",
+      display: "flex",
+      flexDirection: "column",
+      paddingTop: "env(safe-area-inset-top)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "18px 20px 8px",
+      display: "flex",
+      alignItems: "center",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 21,
+      fontWeight: 700,
+      flex: 1
+    }
+  }, t.myEx), /*#__PURE__*/React.createElement("button", {
+    className: "press",
+    onClick: () => setExMgr(false),
+    "aria-label": "\xD7",
+    style: {
+      width: 38,
+      height: 38,
+      borderRadius: 999,
+      background: "#161616",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    }
+  }, Ic.x("#fff"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "8px 20px 4px",
+      display: "flex",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "fld fldD",
+    style: {
+      textAlign: "left",
+      padding: "0 16px",
+      height: 48,
+      borderRadius: 14,
+      flex: 1
+    },
+    placeholder: t.addExPh,
+    value: newExName,
+    onChange: e => setNewExName(e.target.value),
+    onKeyDown: e => {
+      if (e.key === "Enter") addCustomEx();
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "press",
+    onClick: addCustomEx,
+    style: {
+      height: 48,
+      padding: "0 18px",
+      borderRadius: 14,
+      background: "#fff",
+      color: "#0A0A0A",
+      fontSize: 15,
+      fontWeight: 700,
+      flexShrink: 0,
+      opacity: newExName.trim() ? 1 : 0.4,
+      transition: "opacity .2s"
+    }
+  }, t.add)), exNotice && /*#__PURE__*/React.createElement("div", {
+    className: "fadeIn",
+    style: {
+      margin: "8px 20px 0",
+      textAlign: "center",
+      fontSize: 13,
+      color: "#0A0A0A",
+      background: "#fff",
+      padding: "8px 12px",
+      borderRadius: 12,
+      fontWeight: 600
+    }
+  }, exNotice), /*#__PURE__*/React.createElement("div", {
+    className: "hideScroll",
+    style: {
+      flex: 1,
+      overflowY: "auto",
+      padding: "14px 20px 30px"
+    }
+  }, data.exercises.length === 0 ? /*#__PURE__*/React.createElement("p", {
+    className: "fadeIn",
+    style: {
+      color: "#8A8A8A",
+      fontSize: 14,
+      lineHeight: 1.5
+    }
+  }, t.noCustom) : data.exercises.map(n => /*#__PURE__*/React.createElement("div", {
+    key: n,
+    className: "fadeUp",
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      height: 54,
+      borderBottom: "1px solid #1F1F1F"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 16
+    }
+  }, n), /*#__PURE__*/React.createElement("button", {
+    className: "pressS press",
+    onClick: () => delEx === n ? deleteCustomEx(n) : setDelEx(n),
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: delEx === n ? "#fff" : "#6E6E6E",
+      textDecoration: delEx === n ? "underline" : "none",
+      flexShrink: 0,
+      marginLeft: 12
+    }
+  }, delEx === n ? t.delConfirm : t.del)))));
+
+  /* ---- выбор шаблона при старте ---- */
+  const renderStartSheet = () => /*#__PURE__*/React.createElement("div", {
+    className: "fadeIn",
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 55,
+      background: "rgba(0,0,0,0.6)",
+      display: "flex",
+      alignItems: "flex-end"
+    },
+    onClick: () => setStartSheet(false)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sheet",
+    onClick: e => e.stopPropagation(),
+    style: {
+      background: "#141414",
+      width: "100%",
+      borderRadius: "24px 24px 0 0",
+      padding: "22px 20px calc(20px + env(safe-area-inset-bottom))",
+      maxHeight: "78dvh",
+      display: "flex",
+      flexDirection: "column"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 20,
+      fontWeight: 800,
+      letterSpacing: "-0.02em",
+      marginBottom: 14
+    }
+  }, t.chooseTpl), /*#__PURE__*/React.createElement("div", {
+    className: "hideScroll",
+    style: {
+      overflowY: "auto",
+      flex: 1
+    }
+  }, tpls.map(tp => /*#__PURE__*/React.createElement("button", {
+    key: tp.id,
+    className: "press",
+    onClick: () => startFromTpl(tp),
+    style: {
+      width: "100%",
+      textAlign: "left",
+      background: "#1E1E1E",
+      borderRadius: 16,
+      padding: "14px 16px",
+      marginBottom: 8,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 15,
+      fontWeight: 700
+    }
+  }, tp.name), /*#__PURE__*/React.createElement("div", {
+    className: "num",
+    style: {
+      fontSize: 12,
+      color: "#8A8A8A",
+      flexShrink: 0,
+      marginLeft: 12
+    }
+  }, tp.entries.length, " ", t.exAbbr)))), /*#__PURE__*/React.createElement("button", {
+    className: "press",
+    onClick: startWorkout,
+    style: {
+      width: "100%",
+      height: 52,
+      marginTop: 8,
+      borderRadius: 16,
+      background: "#fff",
+      color: "#0A0A0A",
+      fontSize: 15,
+      fontWeight: 700
+    }
+  }, t.emptyWorkout)));
+
+  /* ---- шаблоны: список ---- */
+  const renderTplList = () => /*#__PURE__*/React.createElement("div", {
+    className: "sheet",
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 62,
+      background: "#0A0A0A",
+      color: "#fff",
+      display: "flex",
+      flexDirection: "column",
+      paddingTop: "env(safe-area-inset-top)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "18px 20px 8px",
+      display: "flex",
+      alignItems: "center",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 21,
+      fontWeight: 700,
+      flex: 1
+    }
+  }, t.templates), /*#__PURE__*/React.createElement("button", {
+    className: "press",
+    onClick: () => setTplScreen(null),
+    "aria-label": "\xD7",
+    style: {
+      width: 38,
+      height: 38,
+      borderRadius: 999,
+      background: "#161616",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    }
+  }, Ic.x("#fff"))), /*#__PURE__*/React.createElement("div", {
+    className: "hideScroll",
+    style: {
+      flex: 1,
+      overflowY: "auto",
+      padding: "10px 20px 20px"
+    }
+  }, tpls.map(tp => {
+    const setsC = tp.entries.reduce((a, e) => a + e.sets.length, 0);
+    return /*#__PURE__*/React.createElement("div", {
+      key: tp.id,
+      className: "fadeUp",
+      style: {
+        background: "#161616",
+        borderRadius: 18,
+        padding: "14px 16px",
+        marginBottom: 10
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "press",
+      onClick: () => editTpl(tp),
+      style: {
+        width: "100%",
+        textAlign: "left"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 16,
+        fontWeight: 700
+      }
+    }, tp.name), /*#__PURE__*/React.createElement("div", {
+      className: "num",
+      style: {
+        fontSize: 12,
+        color: "#8A8A8A",
+        marginTop: 4
+      }
+    }, tp.entries.length, " ", t.exAbbr, " \xB7 ", setsC, " ", t.setsWord)), /*#__PURE__*/React.createElement("button", {
+      onClick: () => delTpl === tp.id ? deleteTpl(tp.id) : setDelTpl(tp.id),
+      style: {
+        fontSize: 13,
+        fontWeight: 600,
+        color: delTpl === tp.id ? "#fff" : "#6E6E6E",
+        marginTop: 8,
+        textDecoration: delTpl === tp.id ? "underline" : "none"
+      }
+    }, delTpl === tp.id ? t.delConfirm : t.del));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "12px 20px calc(16px + env(safe-area-inset-bottom))",
+      borderTop: "1px solid #1C1C1C"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "press",
+    onClick: () => setTplScreen({
+      mode: "edit",
+      draft: {
+        id: null,
+        name: "",
+        entries: []
+      }
+    }),
+    style: {
+      width: "100%",
+      height: 54,
+      borderRadius: 18,
+      background: "#fff",
+      color: "#0A0A0A",
+      fontSize: 16,
+      fontWeight: 700,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8
+    }
+  }, Ic.plus("#0A0A0A", 16), " ", t.newTpl)));
+
+  /* ---- шаблоны: редактор ---- */
+  const renderTplEdit = () => {
+    const d = tplScreen.draft;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "sheet",
+      style: {
+        position: "fixed",
+        inset: 0,
+        zIndex: 62,
+        background: "#0A0A0A",
+        color: "#fff",
+        display: "flex",
+        flexDirection: "column",
+        paddingTop: "env(safe-area-inset-top)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "14px 20px 10px",
+        display: "flex",
+        alignItems: "center",
+        gap: 12
+      }
+    }, /*#__PURE__*/React.createElement("input", {
+      className: "fld fldD",
+      style: {
+        textAlign: "left",
+        padding: "0 16px",
+        height: 46,
+        borderRadius: 14,
+        flex: 1,
+        fontWeight: 700
+      },
+      placeholder: t.tplNamePh,
+      value: d.name,
+      onChange: e => mutTpl(x => ({
+        ...x,
+        name: e.target.value
+      }))
+    }), /*#__PURE__*/React.createElement("button", {
+      className: "press",
+      onClick: () => setTplScreen(tpls.length ? {
+        mode: "list"
+      } : null),
+      "aria-label": "\xD7",
+      style: {
+        width: 38,
+        height: 38,
+        borderRadius: 999,
+        background: "#161616",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0
+      }
+    }, Ic.x("#fff"))), notice && /*#__PURE__*/React.createElement("div", {
+      className: "fadeIn",
+      style: {
+        textAlign: "center",
+        fontSize: 13,
+        color: "#0A0A0A",
+        background: "#fff",
+        margin: "0 20px 8px",
+        padding: "8px 12px",
+        borderRadius: 12,
+        fontWeight: 600
+      }
+    }, notice), /*#__PURE__*/React.createElement("div", {
+      className: "hideScroll",
+      style: {
+        flex: 1,
+        overflowY: "auto",
+        padding: "6px 16px 24px"
+      }
+    }, d.entries.length === 0 && /*#__PURE__*/React.createElement("p", {
+      className: "fadeIn",
+      style: {
+        color: "#6E6E6E",
+        textAlign: "center",
+        fontSize: 15,
+        marginTop: 60,
+        lineHeight: 1.5
+      }
+    }, t.addFirst1, /*#__PURE__*/React.createElement("br", null), t.addFirst2), d.entries.map(e => /*#__PURE__*/React.createElement("div", {
+      key: e.id,
+      className: "fadeUp",
+      style: {
+        background: "#161616",
+        borderRadius: 20,
+        padding: "14px 10px",
+        marginBottom: 12
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 8px 10px"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 16,
+        fontWeight: 700
+      }
+    }, e.name), /*#__PURE__*/React.createElement("button", {
+      className: "pressS press",
+      onClick: () => removeTplEntry(e.id),
+      "aria-label": "\xD7",
+      style: {
+        width: 30,
+        height: 30,
+        borderRadius: 999,
+        background: "#242424",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }
+    }, Ic.x("#8A8A8A", 14))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "grid",
+        gridTemplateColumns: "22px 1fr 1fr",
+        gap: 8,
+        padding: "0 8px 4px",
+        fontSize: 10.5,
+        fontWeight: 700,
+        letterSpacing: "0.1em",
+        color: "#6E6E6E",
+        textTransform: "uppercase"
+      }
+    }, /*#__PURE__*/React.createElement("div", null, "\u2116"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        textAlign: "center"
+      }
+    }, t.kg), /*#__PURE__*/React.createElement("div", {
+      style: {
+        textAlign: "center"
+      }
+    }, t.reps)), e.sets.map((s, si) => /*#__PURE__*/React.createElement("div", {
+      key: s.id,
+      style: {
+        display: "grid",
+        gridTemplateColumns: "22px 1fr 1fr",
+        gap: 8,
+        alignItems: "center",
+        padding: "6px 8px"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "num",
+      style: {
+        fontSize: 14,
+        fontWeight: 700,
+        color: "#6E6E6E"
+      }
+    }, si + 1), /*#__PURE__*/React.createElement("input", {
+      className: "fld fldD num",
+      inputMode: "decimal",
+      placeholder: "0",
+      value: s.w,
+      onChange: ev => setTplField(e.id, s.id, "w", ev.target.value),
+      "aria-label": t.kg
+    }), /*#__PURE__*/React.createElement("input", {
+      className: "fld fldD num",
+      inputMode: "numeric",
+      placeholder: "0",
+      value: s.r,
+      onChange: ev => setTplField(e.id, s.id, "r", ev.target.value),
+      "aria-label": t.reps
+    }))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "8px 8px 0"
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "press",
+      onClick: () => addTplSet(e.id),
+      style: {
+        fontSize: 14,
+        fontWeight: 700,
+        color: "#fff",
+        height: 34,
+        display: "flex",
+        alignItems: "center",
+        gap: 6
+      }
+    }, Ic.plus("#fff", 14), " ", t.setBtn), e.sets.length > 1 && /*#__PURE__*/React.createElement("button", {
+      className: "press",
+      onClick: () => popTplSet(e.id),
+      style: {
+        fontSize: 13,
+        fontWeight: 600,
+        color: "#6E6E6E",
+        height: 34
+      }
+    }, t.removeSet))))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "12px 20px calc(16px + env(safe-area-inset-bottom))",
+        borderTop: "1px solid #1C1C1C"
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "press",
+      onClick: () => setPickerCtx("template"),
+      style: {
+        width: "100%",
+        height: 52,
+        borderRadius: 16,
+        background: "#161616",
+        border: "1px solid #2A2A2A",
+        color: "#fff",
+        fontSize: 15,
+        fontWeight: 700,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8
+      }
+    }, Ic.plus("#fff", 15), " ", t.exercise), /*#__PURE__*/React.createElement("button", {
+      className: "press",
+      onClick: saveTpl,
+      style: {
+        width: "100%",
+        height: 54,
+        marginTop: 8,
+        borderRadius: 18,
+        background: "#fff",
+        color: "#0A0A0A",
+        fontSize: 16,
+        fontWeight: 700
+      }
+    }, t.saveTpl)));
+  };
 
   /* ---- активная тренировка ---- */
   const renderWorkout = () => /*#__PURE__*/React.createElement("div", {
@@ -2343,7 +3207,7 @@ function App() {
     }
   }, /*#__PURE__*/React.createElement("button", {
     className: "press",
-    onClick: () => setPicker(true),
+    onClick: () => setPickerCtx("workout"),
     style: {
       width: "100%",
       height: 56,
@@ -2376,7 +3240,7 @@ function App() {
     style: {
       position: "fixed",
       inset: 0,
-      zIndex: 70,
+      zIndex: 80,
       background: "#0A0A0A",
       display: "flex",
       flexDirection: "column",
@@ -2511,11 +3375,11 @@ function App() {
       fontWeight: 600,
       color: tab === id ? "#fff" : "#5A5A5A"
     }
-  }, label)))), menu && renderMenu(), workout && wOpen && renderWorkout(), picker && workout && /*#__PURE__*/React.createElement(Picker, {
+  }, label)))), startSheet && renderStartSheet(), tplScreen && tplScreen.mode === "list" && renderTplList(), tplScreen && tplScreen.mode === "edit" && renderTplEdit(), menu && renderMenu(), exMgr && renderExMgr(), workout && wOpen && renderWorkout(), pickerCtx && /*#__PURE__*/React.createElement(Picker, {
     custom: data.exercises,
     onPick: addExercise,
     onCreate: createExercise,
-    onClose: () => setPicker(false)
+    onClose: () => setPickerCtx(null)
   }), finish && renderFinish());
 }
 ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));
