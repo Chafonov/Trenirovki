@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0A0A0A" />
+<title>Тренировки</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  html,body{margin:0;height:100%;background:#0A0A0A;overscroll-behavior:none}
+  #root{height:100%}
+  .boot{height:100dvh;display:flex;align-items:center;justify-content:center;background:#0A0A0A}
+  .boot i{width:10px;height:10px;border-radius:999px;background:#fff;display:block;animation:bp 1s ease-in-out infinite}
+  @keyframes bp{0%,100%{opacity:.25;transform:scale(.85)}50%{opacity:1;transform:scale(1)}}
+</style>
+</head>
+<body>
+<div id="root"><div class="boot"><i></i></div></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef, useMemo } = React;
+
+/* ================= TELEGRAM ================= */
+
+const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+const cs = tg ? tg.CloudStorage : null;
+const inTG = !!(cs && tg.initData);
+
+if (tg) {
+  try {
+    tg.ready();
+    tg.expand();
+    if (tg.setHeaderColor) tg.setHeaderColor("#0A0A0A");
+    if (tg.setBackgroundColor) tg.setBackgroundColor("#0A0A0A");
+    if (tg.setBottomBarColor) tg.setBottomBarColor("#0A0A0A");
+    if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+  } catch (e) {}
+}
+
+const tgUser = tg && tg.initDataUnsafe ? tg.initDataUnsafe.user : null;
+const USER_NAME = (tgUser && tgUser.first_name) ? tgUser.first_name : "друг";
+
+const haptic = {
+  light: () => { try { tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred("light"); } catch (e) {} },
+  success: () => { try { tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred("success"); } catch (e) {} },
+  warn: () => { try { tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred("warning"); } catch (e) {} },
+};
+
+/* ================= ХРАНИЛИЩЕ ================= */
+/* В Telegram — CloudStorage (синхронизация между устройствами).
+   В обычном браузере — localStorage (для теста).                    */
+
+const P = (fn) => new Promise((res) => fn(res));
+const store = {
+  get: (k) => inTG
+    ? P((r) => cs.getItem(k, (e, v) => r(e ? null : (v || null))))
+    : Promise.resolve(localStorage.getItem(k)),
+  getMany: (ks) => inTG
+    ? P((r) => cs.getItems(ks, (e, m) => r(e ? {} : (m || {}))))
+    : Promise.resolve(ks.reduce((o, k) => { o[k] = localStorage.getItem(k); return o; }, {})),
+  set: (k, v) => inTG
+    ? P((r) => cs.setItem(k, v, (e, ok) => r(!e && ok)))
+    : Promise.resolve((localStorage.setItem(k, v), true)),
+  del: (k) => inTG
+    ? P((r) => cs.removeItem(k, () => r(true)))
+    : Promise.resolve((localStorage.removeItem(k), true)),
+  keys: () => inTG
+    ? P((r) => cs.getKeys((e, ks) => r(e ? [] : (ks || []))))
+    : Promise.resolve(Object.keys(localStorage)),
+};
+
+/* ================= ДАННЫЕ ================= */
+
+const BASE_EXERCISES = [
+  ["Грудь", ["Жим лёжа", "Жим гантелей лёжа", "Жим в наклоне", "Разводка гантелей", "Отжимания"]],
+  ["Спина", ["Становая тяга", "Тяга штанги в наклоне", "Подтягивания", "Тяга верхнего блока", "Горизонтальная тяга", "Тяга гантели одной рукой"]],
+  ["Ноги", ["Приседания со штангой", "Жим ногами", "Румынская тяга", "Выпады", "Разгибания ног", "Сгибания ног", "Подъёмы на носки"]],
+  ["Плечи", ["Жим стоя", "Жим гантелей сидя", "Махи в стороны", "Тяга к подбородку"]],
+  ["Руки", ["Сгибания на бицепс", "Молотки", "Французский жим", "Разгибания на блоке", "Брусья"]],
+  ["Корпус", ["Скручивания", "Планка", "Гиперэкстензия"]],
+];
+
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const pad = (n) => String(n).padStart(2, "0");
+const num = (v) => { const x = parseFloat(String(v).replace(",", ".")); return isNaN(x) ? 0 : x; };
+const fmtKg = (v) => (Math.round(v * 10) / 10).toLocaleString("ru-RU");
+
+function fmtClock(s) {
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
+}
+function fmtDur(s) {
+  const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+  return h > 0 ? `${h} ч ${m} мин` : `${Math.max(1, m)} мин`;
+}
+function fmtDate(iso) {
+  const d = new Date(iso), t = new Date();
+  const dd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const tt = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+  const diff = Math.round((tt - dd) / 864e5);
+  if (diff === 0) return "Сегодня";
+  if (diff === 1) return "Вчера";
+  return d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+}
+const fmtShort = (iso) => new Date(iso).toLocaleDateString("ru-RU", { day: "numeric", month: "numeric" });
+
+/* ================= СТИЛИ ================= */
+
+const CSS = `
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0}
+.root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;color:#fff;background:#0A0A0A}
+input,button{font-family:inherit}
+button{cursor:pointer;border:none;background:none;padding:0;color:inherit;font-size:inherit}
+.num{font-variant-numeric:tabular-nums}
+.press{transition:transform .18s cubic-bezier(.34,1.56,.64,1),opacity .18s ease}
+.press:active{transform:scale(.96)}
+.pressS:active{transform:scale(.92)}
+.fadeUp{animation:fadeUp .5s cubic-bezier(.22,1,.36,1) both}
+.fadeIn{animation:fadeIn .3s ease both}
+.sheet{animation:sheet .42s cubic-bezier(.32,.72,0,1) both}
+.pop{animation:pop .4s cubic-bezier(.34,1.56,.64,1) both}
+.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s .2s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes sheet{from{transform:translateY(100%)}to{transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+.fld{background:#242424;border:none;border-radius:12px;height:44px;font-size:17px;text-align:center;width:100%;color:#fff;outline:none;min-width:0}
+.fld::placeholder{color:#5E5E5E}
+.fld:focus-visible{box-shadow:0 0 0 2px #fff}
+.fldD{background:#242424;color:#fff}
+.fldD::placeholder{color:#5E5E5E}
+.fldD:focus-visible{box-shadow:0 0 0 2px #fff}
+.row{display:grid;grid-template-columns:22px minmax(0,.85fr) 1fr 1fr 38px;gap:8px;align-items:center;padding:6px 8px;border-radius:14px;transition:background .25s ease,color .25s ease}
+.row.done{background:#fff}
+.row.done .fldD{background:rgba(0,0,0,.06);color:#0A0A0A}
+.row.done .prev{color:#8A8A8A}
+.chk{width:30px;height:30px;border-radius:10px;border:1.5px solid #3E3E3E;display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s;flex-shrink:0}
+.chk.on{background:#0A0A0A;border-color:#0A0A0A}
+.row.done .chk{border-color:#0A0A0A}
+.hideScroll{scrollbar-width:none}
+.hideScroll::-webkit-scrollbar{display:none}
+.chip{height:38px;padding:0 16px;border-radius:999px;border:1px solid #2A2A2A;font-size:14px;font-weight:600;white-space:nowrap;flex-shrink:0;color:#8A8A8A;transition:background .2s,color .2s,border-color .2s}
+.chip.on{background:#fff;color:#0A0A0A;border-color:#fff}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+`;
+
+/* ================= ИКОНКИ ================= */
+
+const Ic = {
+  home: (c) => <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V21h14V9.5" /></svg>,
+  hist: (c) => <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>,
+  chart: (c) => <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19 10 12l4 3 6-8" /></svg>,
+  plus: (c, s = 20) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>,
+  x: (c, s = 18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>,
+  check: (c, s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 12.5 10 18 19.5 6.5" /></svg>,
+  down: (c) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 9l7 7 7-7" /></svg>,
+};
+
+/* ================= ГРАФИК ================= */
+
+function Chart({ pts, unit }) {
+  const W = 340, H = 190, PD = { l: 38, r: 18, t: 26, b: 26 };
+  const vs = pts.map((p) => p.v);
+  let mn = Math.min(...vs), mx = Math.max(...vs);
+  if (mn === mx) { mx = mx + Math.max(2, mx * 0.1); mn = Math.max(0, mn - Math.max(2, mn * 0.1)); }
+  const X = (i) => PD.l + (W - PD.l - PD.r) * (pts.length === 1 ? 0.5 : i / (pts.length - 1));
+  const Y = (v) => PD.t + (H - PD.t - PD.b) * (1 - (v - mn) / (mx - mn));
+  const path = pts.map((p, i) => `${i ? "L" : "M"}${X(i).toFixed(1)},${Y(p.v).toFixed(1)}`).join(" ");
+  const mid = (mn + mx) / 2;
+  const last = pts[pts.length - 1];
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", display: "block" }}>
+      {[mx, mid, mn].map((v, i) => (
+        <g key={i}>
+          <line x1={PD.l} x2={W - PD.r} y1={Y(v)} y2={Y(v)} stroke="#2A2A2A" strokeWidth="1" strokeDasharray={i === 2 ? "" : "2 4"} />
+          <text x={PD.l - 8} y={Y(v) + 3.5} textAnchor="end" fontSize="10" fill="#7A7A7A" className="num">{fmtKg(v)}</text>
+        </g>
+      ))}
+      {pts.length > 1 && <path d={path} pathLength="1" className="draw" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />}
+      {pts.map((p, i) => {
+        const isLast = i === pts.length - 1;
+        return (
+          <g key={i} className="pop" style={{ animationDelay: `${0.25 + i * 0.05}s`, transformOrigin: `${X(i)}px ${Y(p.v)}px` }}>
+            <circle cx={X(i)} cy={Y(p.v)} r={isLast ? 5 : 3.4} fill={isLast ? "#fff" : "#161616"} stroke="#fff" strokeWidth="2" />
+            {isLast && <text x={X(i)} y={Y(p.v) - 12} textAnchor="middle" fontSize="12" fontWeight="700" fill="#fff" className="num">{fmtKg(p.v)} {unit}</text>}
+          </g>
+        );
+      })}
+      <text x={PD.l} y={H - 6} fontSize="10" fill="#7A7A7A">{fmtShort(pts[0].date)}</text>
+      {pts.length > 1 && <text x={W - PD.r} y={H - 6} textAnchor="end" fontSize="10" fill="#7A7A7A">{fmtShort(last.date)}</text>}
+    </svg>
+  );
+}
+
+/* ================= ВЫБОР УПРАЖНЕНИЯ ================= */
+
+function Picker({ custom, onPick, onCreate, onClose }) {
+  const [q, setQ] = useState("");
+  const ref = useRef(null);
+  useEffect(() => { const t = setTimeout(() => ref.current && ref.current.focus(), 400); return () => clearTimeout(t); }, []);
+
+  const all = useMemo(() => {
+    const arr = [];
+    BASE_EXERCISES.forEach(([g, items]) => items.forEach((n) => arr.push({ group: g, name: n })));
+    custom.forEach((n) => arr.push({ group: "Свои", name: n }));
+    return arr;
+  }, [custom]);
+
+  const ql = q.trim().toLowerCase();
+  const filtered = ql ? all.filter((e) => e.name.toLowerCase().includes(ql)) : all;
+  const groups = [];
+  filtered.forEach((e) => {
+    let g = groups.find((x) => x.name === e.group);
+    if (!g) { g = { name: e.group, items: [] }; groups.push(g); }
+    g.items.push(e.name);
+  });
+  const canCreate = ql.length > 0 && !all.some((e) => e.name.toLowerCase() === ql);
+
+  return (
+    <div className="sheet" style={{ position: "fixed", inset: 0, zIndex: 60, background: "#0A0A0A", color: "#fff", display: "flex", flexDirection: "column" }}>
+      <div style={{ padding: "18px 20px 12px", display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ fontSize: 21, fontWeight: 700, flex: 1 }}>Упражнение</div>
+        <button className="press" onClick={onClose} style={{ width: 38, height: 38, borderRadius: 999, background: "#1E1E1E", display: "flex", alignItems: "center", justifyContent: "center" }} aria-label="Закрыть">{Ic.x("#fff")}</button>
+      </div>
+      <div style={{ padding: "0 20px 14px" }}>
+        <input ref={ref} className="fld fldD" style={{ textAlign: "left", padding: "0 16px", height: 48, borderRadius: 14 }} placeholder="Поиск или новое название" value={q} onChange={(e) => setQ(e.target.value)} />
+      </div>
+      <div className="hideScroll" style={{ flex: 1, overflowY: "auto", padding: "0 20px 40px" }}>
+        {canCreate && (
+          <button className="press" onClick={() => onCreate(q.trim())} style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, height: 54, borderBottom: "1px solid #1F1F1F", fontSize: 16, fontWeight: 600, textAlign: "left" }}>
+            <span style={{ width: 28, height: 28, borderRadius: 999, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{Ic.plus("#0A0A0A", 16)}</span>
+            Создать «{q.trim()}»
+          </button>
+        )}
+        {groups.map((g) => (
+          <div key={g.name}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#6E6E6E", padding: "20px 0 6px" }}>{g.name}</div>
+            {g.items.map((n) => (
+              <button key={n} className="press" onClick={() => onPick(n)} style={{ width: "100%", height: 52, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #1F1F1F", fontSize: 16, textAlign: "left" }}>
+                {n}<span style={{ opacity: 0.35 }}>{Ic.plus("#fff", 16)}</span>
+              </button>
+            ))}
+          </div>
+        ))}
+        {filtered.length === 0 && !canCreate && <div style={{ color: "#6E6E6E", paddingTop: 30, textAlign: "center", fontSize: 15 }}>Ничего не найдено</div>}
+      </div>
+    </div>
+  );
+}
+
+/* ================= ПРИЛОЖЕНИЕ ================= */
+
+function App() {
+  const [boot, setBoot] = useState("loading");
+  const [data, setData] = useState({ workouts: [], exercises: [] });
+
+  const [tab, setTab] = useState("home");
+  const [workout, setWorkout] = useState(null);
+  const [wOpen, setWOpen] = useState(false);
+  const [picker, setPicker] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const [finish, setFinish] = useState(null);
+  const [notice, setNotice] = useState("");
+  const [cancelArm, setCancelArm] = useState(false);
+
+  const [expanded, setExpanded] = useState(null);
+  const [delWk, setDelWk] = useState(null);
+  const [selEx, setSelEx] = useState(null);
+
+  /* ---- загрузка ---- */
+  useEffect(() => {
+    (async () => {
+      try {
+        const keys = await store.keys();
+        const wKeys = keys.filter((k) => k.indexOf("w:") === 0);
+        let workouts = [];
+        if (wKeys.length) {
+          const map = await store.getMany(wKeys);
+          workouts = wKeys.map((k) => { try { return JSON.parse(map[k]); } catch (e) { return null; } }).filter(Boolean);
+          workouts.sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+        const exRaw = await store.get("ex");
+        const exercises = exRaw ? JSON.parse(exRaw) : [];
+        const draftRaw = await store.get("draft");
+        setData({ workouts, exercises });
+        setWorkout(draftRaw ? JSON.parse(draftRaw) : null);
+      } catch (e) {}
+      setBoot("app");
+    })();
+  }, []);
+
+  /* ---- черновик: автосохранение ---- */
+  useEffect(() => {
+    if (boot !== "app") return;
+    const t = setTimeout(() => {
+      if (workout) store.set("draft", JSON.stringify(workout));
+      else store.del("draft");
+    }, 600);
+    return () => clearTimeout(t);
+  }, [workout, boot]);
+
+  /* ---- защита от случайного закрытия во время тренировки ---- */
+  useEffect(() => {
+    if (!tg) return;
+    try { workout ? tg.enableClosingConfirmation() : tg.disableClosingConfirmation(); } catch (e) {}
+  }, [!!workout]);
+
+  /* ---- кнопка "Назад" в Telegram ---- */
+  useEffect(() => {
+    const bb = tg ? tg.BackButton : null;
+    if (!bb) return;
+    let action = null;
+    if (finish) action = () => setFinish(null);
+    else if (picker) action = () => setPicker(false);
+    else if (workout && wOpen) action = () => setWOpen(false);
+    if (action) {
+      try { bb.onClick(action); bb.show(); } catch (e) {}
+      return () => { try { bb.offClick(action); bb.hide(); } catch (e) {} };
+    }
+    try { bb.hide(); } catch (e) {}
+  }, [finish, picker, workout, wOpen]);
+
+  /* ---- таймер ---- */
+  useEffect(() => {
+    if (!workout) return;
+    const tick = () => setElapsed(Math.max(0, Math.floor((Date.now() - workout.startedAt) / 1000)));
+    tick();
+    const t = setInterval(tick, 1000);
+    return () => clearInterval(t);
+  }, [workout && workout.startedAt]);
+
+  useEffect(() => { if (cancelArm) { const t = setTimeout(() => setCancelArm(false), 2600); return () => clearTimeout(t); } }, [cancelArm]);
+  useEffect(() => { if (notice) { const t = setTimeout(() => setNotice(""), 2200); return () => clearTimeout(t); } }, [notice]);
+  useEffect(() => { if (delWk) { const t = setTimeout(() => setDelWk(null), 2600); return () => clearTimeout(t); } }, [delWk]);
+
+  /* ---- тренировка ---- */
+  function lastSetsFor(name) {
+    const w = data.workouts.find((wk) => wk.entries.some((e) => e.name === name));
+    if (!w) return null;
+    return w.entries.find((e) => e.name === name).sets;
+  }
+  function startWorkout() {
+    haptic.light();
+    setWorkout({ startedAt: Date.now(), entries: [] });
+    setWOpen(true);
+    setPicker(true);
+  }
+  function addExercise(name) {
+    const prev = lastSetsFor(name);
+    const sets = (prev && prev.length ? prev : [null]).map((p) => ({ id: uid(), w: "", r: "", done: false, pw: p ? p.w : "", pr: p ? p.r : "" }));
+    setWorkout((wk) => ({ ...wk, entries: [...wk.entries, { id: uid(), name, sets }] }));
+    setPicker(false);
+  }
+  function createExercise(name) {
+    if (!data.exercises.includes(name)) {
+      const next = [...data.exercises, name];
+      setData((d) => ({ ...d, exercises: next }));
+      store.set("ex", JSON.stringify(next));
+    }
+    addExercise(name);
+  }
+  const mutEntry = (eid, fn) => setWorkout((wk) => ({ ...wk, entries: wk.entries.map((e) => (e.id === eid ? fn(e) : e)) }));
+  const setField = (eid, sid, f, v) => mutEntry(eid, (e) => ({ ...e, sets: e.sets.map((s) => (s.id === sid ? { ...s, [f]: v } : s)) }));
+  const toggleDone = (eid, sid) => mutEntry(eid, (e) => ({
+    ...e,
+    sets: e.sets.map((s) => {
+      if (s.id !== sid) return s;
+      if (s.done) return { ...s, done: false };
+      haptic.light();
+      return { ...s, done: true, w: s.w !== "" ? s.w : String(s.pw != null ? s.pw : ""), r: s.r !== "" ? s.r : String(s.pr != null ? s.pr : "") };
+    }),
+  }));
+  const addSet = (eid) => mutEntry(eid, (e) => {
+    const l = e.sets[e.sets.length - 1];
+    return { ...e, sets: [...e.sets, { id: uid(), w: "", r: "", done: false, pw: l ? (l.w !== "" ? l.w : l.pw) : "", pr: l ? (l.r !== "" ? l.r : l.pr) : "" }] };
+  });
+  const popSet = (eid) => mutEntry(eid, (e) => ({ ...e, sets: e.sets.slice(0, -1) }));
+  const removeEntry = (eid) => setWorkout((wk) => ({ ...wk, entries: wk.entries.filter((e) => e.id !== eid) }));
+
+  async function finishWorkout() {
+    const clean = workout.entries
+      .map((e) => ({ name: e.name, sets: e.sets.filter((s) => num(s.r) > 0).map((s) => ({ w: num(s.w), r: num(s.r) })) }))
+      .filter((e) => e.sets.length > 0);
+    if (clean.length === 0) { setNotice("Заполни хотя бы один подход"); haptic.warn(); return; }
+    const dur = Math.max(1, Math.floor((Date.now() - workout.startedAt) / 1000));
+    const wk = { id: uid(), date: new Date(workout.startedAt).toISOString(), duration: dur, entries: clean };
+    const json = JSON.stringify(wk);
+    if (inTG && json.length > 4096) {
+      try { tg.showAlert("Эта тренировка слишком большая для облака Telegram. Попробуй меньше упражнений за раз."); } catch (e) {}
+      return;
+    }
+    await store.set("w:" + wk.id, json);
+    store.del("draft");
+    setData((d) => ({ ...d, workouts: [wk, ...d.workouts] }));
+    const vol = clean.reduce((a, e) => a + e.sets.reduce((b, s) => b + s.w * s.r, 0), 0);
+    const setsC = clean.reduce((a, e) => a + e.sets.length, 0);
+    haptic.success();
+    setFinish({ dur, vol, sets: setsC, ex: clean.length });
+    setWorkout(null);
+    setWOpen(false);
+    setCancelArm(false);
+  }
+  function cancelWorkout() {
+    if (!cancelArm) { setCancelArm(true); return; }
+    store.del("draft");
+    setWorkout(null); setWOpen(false); setCancelArm(false);
+  }
+  function deleteWorkout(id) {
+    store.del("w:" + id);
+    setData((d) => ({ ...d, workouts: d.workouts.filter((x) => x.id !== id) }));
+    setDelWk(null);
+  }
+
+  /* ---- производные ---- */
+  const stats = useMemo(() => {
+    const week = data.workouts.filter((w) => Date.now() - new Date(w.date).getTime() < 7 * 864e5).length;
+    const sets = data.workouts.reduce((a, w) => a + w.entries.reduce((b, e) => b + e.sets.length, 0), 0);
+    return { week, total: data.workouts.length, sets };
+  }, [data.workouts]);
+
+  const exList = useMemo(() => {
+    const cnt = {};
+    data.workouts.forEach((w) => w.entries.forEach((e) => { cnt[e.name] = (cnt[e.name] || 0) + 1; }));
+    return Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a]);
+  }, [data.workouts]);
+
+  const activeEx = selEx && exList.includes(selEx) ? selEx : exList[0] || null;
+
+  const progress = useMemo(() => {
+    if (!activeEx) return null;
+    const asc = [...data.workouts].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const rel = asc.filter((w) => w.entries.some((e) => e.name === activeEx));
+    const weighted = rel.some((w) => w.entries.find((e) => e.name === activeEx).sets.some((s) => s.w > 0));
+    const pts = rel.map((w) => {
+      const sets = w.entries.find((e) => e.name === activeEx).sets;
+      const v = weighted ? Math.max(...sets.map((s) => s.w)) : Math.max(...sets.map((s) => s.r));
+      return { date: w.date, v };
+    });
+    return { pts, unit: weighted ? "кг" : "повт", record: Math.max(...pts.map((p) => p.v)), last: pts[pts.length - 1].v };
+  }, [activeEx, data.workouts]);
+
+  const wVolume = (w) => w.entries.reduce((a, e) => a + e.sets.reduce((b, s) => b + s.w * s.r, 0), 0);
+  const wSets = (w) => w.entries.reduce((a, e) => a + e.sets.length, 0);
+
+  /* ================= ЭКРАНЫ ================= */
+
+  if (boot === "loading") {
+    return <div className="root" style={{ height: "100dvh", display: "flex", alignItems: "center", justifyContent: "center" }}><style>{CSS}</style><div className="fadeIn" style={{ width: 10, height: 10, borderRadius: 999, background: "#fff" }} /></div>;
+  }
+
+  /* ---- домашний ---- */
+  const renderHome = () => {
+    const lastW = data.workouts[0];
+    return (
+      <div style={{ padding: "0 20px" }}>
+        <div className="fadeUp" style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", color: "#9A9A9A", textTransform: "uppercase", paddingTop: 22 }}>
+          {new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" })}
+        </div>
+        <h1 className="fadeUp" style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-0.03em", margin: "14px 0 24px", animationDelay: "50ms" }}>Привет, {USER_NAME}</h1>
+
+        {data.workouts.length > 0 ? (
+          <div className="fadeUp" style={{ display: "flex", background: "#161616", borderRadius: 20, padding: "18px 8px", marginBottom: 16, animationDelay: "100ms" }}>
+            {[[stats.week, "за 7 дней"], [stats.total, "всего"], [stats.sets, "подходов"]].map(([v, l], i) => (
+              <div key={i} style={{ flex: 1, textAlign: "center", borderLeft: i ? "1px solid #262626" : "none" }}>
+                <div className="num" style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.02em" }}>{v}</div>
+                <div style={{ fontSize: 12, color: "#8A8A8A", marginTop: 2 }}>{l}</div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="fadeUp" style={{ color: "#9A9A9A", fontSize: 15, lineHeight: 1.5, marginBottom: 16, animationDelay: "100ms" }}>Здесь появится статистика после первой тренировки.</p>
+        )}
+
+        <button className="press fadeUp" onClick={startWorkout} style={{ width: "100%", height: 60, borderRadius: 20, background: "#fff", color: "#0A0A0A", fontSize: 17, fontWeight: 700, animationDelay: "150ms", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+          {Ic.plus("#0A0A0A", 18)} Начать тренировку
+        </button>
+
+        {lastW && (
+          <div className="fadeUp" style={{ marginTop: 28, animationDelay: "200ms" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", color: "#9A9A9A", textTransform: "uppercase", marginBottom: 10 }}>Последняя тренировка</div>
+            <button className="press" onClick={() => { setTab("hist"); setExpanded(lastW.id); }} style={{ width: "100%", textAlign: "left", background: "#161616", borderRadius: 20, padding: 18 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 15, fontWeight: 700 }}>
+                <span>{fmtDate(lastW.date)}</span><span className="num" style={{ color: "#8A8A8A", fontWeight: 500 }}>{fmtDur(lastW.duration)}</span>
+              </div>
+              <div style={{ fontSize: 13, color: "#8A8A8A", marginTop: 6 }} className="num">
+                {lastW.entries.length} упр. · {wSets(lastW)} подходов{wVolume(lastW) > 0 ? ` · ${fmtKg(wVolume(lastW))} кг` : ""}
+              </div>
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  /* ---- история ---- */
+  const renderHist = () => (
+    <div style={{ padding: "0 20px" }}>
+      <h1 className="fadeUp" style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-0.03em", margin: "20px 0 20px" }}>История</h1>
+      {data.workouts.length === 0 && <p className="fadeUp" style={{ color: "#9A9A9A", fontSize: 15, lineHeight: 1.5 }}>Пока пусто. Первая тренировка появится здесь.</p>}
+      {data.workouts.map((w, i) => {
+        const open = expanded === w.id;
+        return (
+          <div key={w.id} className="fadeUp" style={{ background: "#161616", borderRadius: 20, marginBottom: 12, animationDelay: `${Math.min(i, 8) * 40}ms`, overflow: "hidden" }}>
+            <button className="press" onClick={() => setExpanded(open ? null : w.id)} style={{ width: "100%", textAlign: "left", padding: 18 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 15, fontWeight: 700 }}>
+                <span>{fmtDate(w.date)}</span><span className="num" style={{ color: "#8A8A8A", fontWeight: 500 }}>{fmtDur(w.duration)}</span>
+              </div>
+              <div style={{ fontSize: 13, color: "#8A8A8A", marginTop: 6 }} className="num">
+                {w.entries.length} упр. · {wSets(w)} подходов{wVolume(w) > 0 ? ` · ${fmtKg(wVolume(w))} кг` : ""}
+              </div>
+            </button>
+            {open && (
+              <div className="fadeIn" style={{ padding: "0 18px 16px" }}>
+                <div style={{ height: 1, background: "#262626", marginBottom: 14 }} />
+                {w.entries.map((e, j) => (
+                  <div key={j} style={{ marginBottom: 12 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700 }}>{e.name}</div>
+                    <div className="num" style={{ fontSize: 13, color: "#8A8A8A", marginTop: 3 }}>
+                      {e.sets.map((s) => (s.w > 0 ? `${fmtKg(s.w)}×${s.r}` : `×${s.r}`)).join("  ·  ")}
+                    </div>
+                  </div>
+                ))}
+                <button onClick={() => (delWk === w.id ? deleteWorkout(w.id) : setDelWk(w.id))} style={{ fontSize: 13, fontWeight: 600, color: delWk === w.id ? "#fff" : "#8A8A8A", marginTop: 4, textDecoration: delWk === w.id ? "underline" : "none" }}>
+                  {delWk === w.id ? "Нажми ещё раз — удалить" : "Удалить"}
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  /* ---- прогресс ---- */
+  const renderProg = () => (
+    <div style={{ padding: "0 20px" }}>
+      <h1 className="fadeUp" style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-0.03em", margin: "20px 0 20px" }}>Прогресс</h1>
+      {exList.length === 0 ? (
+        <p className="fadeUp" style={{ color: "#9A9A9A", fontSize: 15, lineHeight: 1.5 }}>Проведи пару тренировок — здесь появится график роста весов по каждому упражнению.</p>
+      ) : (
+        <>
+          <div className="hideScroll fadeUp" style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 6, marginBottom: 16 }}>
+            {exList.map((n) => (
+              <button key={n} className={`chip press ${n === activeEx ? "on" : ""}`} onClick={() => setSelEx(n)}>{n}</button>
+            ))}
+          </div>
+          {progress && (
+            <div key={activeEx}>
+              <div className="fadeUp" style={{ background: "#161616", borderRadius: 20, padding: "16px 10px 10px" }}>
+                <Chart pts={progress.pts} unit={progress.unit} />
+              </div>
+              {progress.pts.length === 1 && <p className="fadeIn" style={{ fontSize: 13, color: "#8A8A8A", marginTop: 10, textAlign: "center" }}>Ещё одна тренировка — и появится линия прогресса</p>}
+              <div className="fadeUp" style={{ display: "flex", marginTop: 16, background: "#161616", borderRadius: 20, padding: "16px 8px", animationDelay: "80ms" }}>
+                {[[`${fmtKg(progress.record)}`, `рекорд, ${progress.unit}`], [`${fmtKg(progress.last)}`, `последний, ${progress.unit}`], [progress.pts.length, "тренировок"]].map(([v, l], i) => (
+                  <div key={i} style={{ flex: 1, textAlign: "center", borderLeft: i ? "1px solid #262626" : "none" }}>
+                    <div className="num" style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.02em" }}>{v}</div>
+                    <div style={{ fontSize: 11, color: "#8A8A8A", marginTop: 2 }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+
+  /* ---- активная тренировка ---- */
+  const renderWorkout = () => (
+    <div className="sheet" style={{ position: "fixed", inset: 0, zIndex: 50, background: "#0A0A0A", color: "#fff", display: "flex", flexDirection: "column" }}>
+      <div style={{ padding: "max(14px, env(safe-area-inset-top)) 20px 12px", display: "flex", alignItems: "center", gap: 12 }}>
+        <button className="press" onClick={() => setWOpen(false)} aria-label="Свернуть" style={{ width: 38, height: 38, borderRadius: 999, background: "#1E1E1E", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{Ic.down("#fff")}</button>
+        <div className="num" style={{ flex: 1, textAlign: "center", fontSize: 32, fontWeight: 800, letterSpacing: "-0.02em" }}>{fmtClock(elapsed)}</div>
+        <button className="press" onClick={finishWorkout} style={{ height: 38, padding: "0 18px", borderRadius: 999, background: "#fff", color: "#0A0A0A", fontSize: 15, fontWeight: 700, flexShrink: 0 }}>Готово</button>
+      </div>
+      {notice && <div className="fadeIn" style={{ textAlign: "center", fontSize: 13, color: "#0A0A0A", background: "#fff", margin: "0 20px 8px", padding: "8px 12px", borderRadius: 12, fontWeight: 600 }}>{notice}</div>}
+
+      <div className="hideScroll" style={{ flex: 1, overflowY: "auto", padding: "6px 16px 24px" }}>
+        {workout.entries.length === 0 && <p className="fadeIn" style={{ color: "#6E6E6E", textAlign: "center", fontSize: 15, marginTop: 60, lineHeight: 1.5 }}>Добавь первое упражнение —<br />и поехали.</p>}
+        {workout.entries.map((e) => (
+          <div key={e.id} className="fadeUp" style={{ background: "#161616", borderRadius: 20, padding: "14px 10px", marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 8px 10px" }}>
+              <div style={{ fontSize: 16, fontWeight: 700 }}>{e.name}</div>
+              <button className="pressS press" onClick={() => removeEntry(e.id)} aria-label="Убрать упражнение" style={{ width: 30, height: 30, borderRadius: 999, background: "#242424", display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.x("#8A8A8A", 14)}</button>
+            </div>
+            <div className="row" style={{ padding: "0 8px 4px", fontSize: 10.5, fontWeight: 700, letterSpacing: "0.1em", color: "#6E6E6E", textTransform: "uppercase" }}>
+              <div>№</div><div>Прошлый</div><div style={{ textAlign: "center" }}>кг</div><div style={{ textAlign: "center" }}>повт</div><div />
+            </div>
+            {e.sets.map((s, si) => (
+              <div key={s.id} className={`row ${s.done ? "done" : ""}`}>
+                <div className="num" style={{ fontSize: 14, fontWeight: 700, color: s.done ? "#0A0A0A" : "#6E6E6E" }}>{si + 1}</div>
+                <div className="prev num" style={{ fontSize: 13, color: "#6E6E6E", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {s.pw !== "" && s.pr !== "" ? `${fmtKg(num(s.pw))}×${s.pr}` : "—"}
+                </div>
+                <input className="fld fldD num" inputMode="decimal" placeholder={s.pw !== "" ? String(s.pw) : "0"} value={s.w} onChange={(ev) => setField(e.id, s.id, "w", ev.target.value)} aria-label="Вес" />
+                <input className="fld fldD num" inputMode="numeric" placeholder={s.pr !== "" ? String(s.pr) : "0"} value={s.r} onChange={(ev) => setField(e.id, s.id, "r", ev.target.value)} aria-label="Повторы" />
+                <button className={`chk pressS press ${s.done ? "on" : ""}`} onClick={() => toggleDone(e.id, s.id)} aria-label="Выполнено">{s.done && Ic.check("#fff")}</button>
+              </div>
+            ))}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 8px 0" }}>
+              <button className="press" onClick={() => addSet(e.id)} style={{ fontSize: 14, fontWeight: 700, color: "#fff", height: 34, display: "flex", alignItems: "center", gap: 6 }}>{Ic.plus("#fff", 14)} Подход</button>
+              {e.sets.length > 1 && <button className="press" onClick={() => popSet(e.id)} style={{ fontSize: 13, fontWeight: 600, color: "#6E6E6E", height: 34 }}>Убрать подход</button>}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ padding: "12px 20px calc(16px + env(safe-area-inset-bottom))", borderTop: "1px solid #1C1C1C" }}>
+        <button className="press" onClick={() => setPicker(true)} style={{ width: "100%", height: 56, borderRadius: 18, background: "#fff", color: "#0A0A0A", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          {Ic.plus("#0A0A0A", 16)} Упражнение
+        </button>
+        <button onClick={cancelWorkout} style={{ width: "100%", height: 44, marginTop: 6, fontSize: 14, fontWeight: 600, color: cancelArm ? "#fff" : "#6E6E6E", textDecoration: cancelArm ? "underline" : "none" }}>
+          {cancelArm ? "Точно отменить? Данные пропадут" : "Отменить тренировку"}
+        </button>
+      </div>
+    </div>
+  );
+
+  /* ---- итог ---- */
+  const renderFinish = () => (
+    <div className="fadeIn" style={{ position: "fixed", inset: 0, zIndex: 70, background: "#0A0A0A", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 32, textAlign: "center" }}>
+      <div className="fadeUp" style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", color: "#9A9A9A" }}>ТРЕНИРОВКА ЗАПИСАНА</div>
+      <div className="pop num" style={{ fontSize: 58, fontWeight: 800, letterSpacing: "-0.03em", margin: "14px 0 26px", animationDelay: "100ms" }}>{fmtClock(finish.dur)}</div>
+      <div className="fadeUp" style={{ display: "flex", gap: 28, animationDelay: "200ms" }}>
+        {[[finish.ex, "упражн."], [finish.sets, "подходов"], ...(finish.vol > 0 ? [[fmtKg(finish.vol), "кг тоннаж"]] : [])].map(([v, l], i) => (
+          <div key={i}>
+            <div className="num" style={{ fontSize: 24, fontWeight: 800 }}>{v}</div>
+            <div style={{ fontSize: 12, color: "#8A8A8A", marginTop: 2 }}>{l}</div>
+          </div>
+        ))}
+      </div>
+      <button className="press fadeUp" onClick={() => setFinish(null)} style={{ marginTop: 44, height: 56, padding: "0 44px", borderRadius: 18, background: "#fff", color: "#0A0A0A", fontSize: 16, fontWeight: 700, animationDelay: "300ms" }}>Отлично</button>
+    </div>
+  );
+
+  /* ---- каркас ---- */
+  const TABS = [["home", "Главная", Ic.home], ["hist", "История", Ic.hist], ["prog", "Прогресс", Ic.chart]];
+
+  return (
+    <div className="root" style={{ height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", paddingTop: "env(safe-area-inset-top)" }}>
+      <style>{CSS}</style>
+      <div className="hideScroll" style={{ flex: 1, overflowY: "auto", paddingBottom: 20 }} key={tab}>
+        {tab === "home" && renderHome()}
+        {tab === "hist" && renderHist()}
+        {tab === "prog" && renderProg()}
+      </div>
+
+      {workout && !wOpen && (
+        <button className="press pop" onClick={() => setWOpen(true)} style={{ margin: "0 20px 10px", height: 52, borderRadius: 999, background: "#fff", color: "#0A0A0A", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", flexShrink: 0 }}>
+          <span style={{ fontSize: 15, fontWeight: 700 }}>Идёт тренировка</span>
+          <span className="num" style={{ fontSize: 15, fontWeight: 700 }}>{fmtClock(elapsed)}</span>
+        </button>
+      )}
+
+      <div style={{ display: "flex", borderTop: "1px solid #1F1F1F", paddingBottom: "env(safe-area-inset-bottom)", flexShrink: 0, background: "#0A0A0A" }}>
+        {TABS.map(([id, label, icon]) => (
+          <button key={id} className="press" onClick={() => setTab(id)} style={{ flex: 1, height: 60, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3 }}>
+            {icon(tab === id ? "#fff" : "#5A5A5A")}
+            <span style={{ fontSize: 10, fontWeight: 600, color: tab === id ? "#fff" : "#5A5A5A" }}>{label}</span>
+          </button>
+        ))}
+      </div>
+
+      {workout && wOpen && renderWorkout()}
+      {picker && workout && <Picker custom={data.exercises} onPick={addExercise} onCreate={createExercise} onClose={() => setPicker(false)} />}
+      {finish && renderFinish()}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
