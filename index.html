@@ -799,6 +799,17 @@ const Ic = {
     cx: "19",
     cy: "12",
     r: "2"
+  })),
+  burger: c => /*#__PURE__*/React.createElement("svg", {
+    width: "21",
+    height: "21",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: c,
+    strokeWidth: "2.2",
+    strokeLinecap: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M4 7h16M4 12h16M4 17h16"
   }))
 };
 
@@ -1818,9 +1829,22 @@ function App() {
       style: {
         display: "flex",
         alignItems: "center",
-        paddingTop: 12
+        justifyContent: "space-between",
+        paddingTop: 16
       }
-    }, /*#__PURE__*/React.createElement("button", {
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: "0.14em",
+        color: "#9A9A9A",
+        textTransform: "uppercase"
+      }
+    }, new Date().toLocaleDateString(t.locale, {
+      weekday: "long",
+      day: "numeric",
+      month: "long"
+    })), /*#__PURE__*/React.createElement("button", {
       className: "press",
       onClick: () => setMenu(true),
       "aria-label": t.menu,
@@ -1832,23 +1856,10 @@ function App() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        marginLeft: -2
+        marginRight: -2,
+        flexShrink: 0
       }
-    }, Ic.dots("#fff"))), /*#__PURE__*/React.createElement("div", {
-      className: "fadeUp",
-      style: {
-        fontSize: 11,
-        fontWeight: 700,
-        letterSpacing: "0.14em",
-        color: "#9A9A9A",
-        textTransform: "uppercase",
-        paddingTop: 12
-      }
-    }, new Date().toLocaleDateString(t.locale, {
-      weekday: "long",
-      day: "numeric",
-      month: "long"
-    })), /*#__PURE__*/React.createElement("h1", {
+    }, Ic.burger("#fff"))), /*#__PURE__*/React.createElement("h1", {
       className: "fadeUp",
       style: {
         fontSize: 32,
@@ -1930,20 +1941,6 @@ function App() {
       }
     }, /*#__PURE__*/React.createElement("button", {
       className: "press",
-      onClick: onStartPress,
-      style: {
-        flex: 1.25,
-        height: 60,
-        borderRadius: 20,
-        background: "#fff",
-        color: "#0A0A0A",
-        fontSize: 15,
-        fontWeight: 700,
-        lineHeight: 1.15,
-        padding: "0 10px"
-      }
-    }, t.start), /*#__PURE__*/React.createElement("button", {
-      className: "press",
       onClick: onTplPress,
       style: {
         flex: 1,
@@ -1951,13 +1948,27 @@ function App() {
         borderRadius: 20,
         background: "#161616",
         color: "#fff",
-        fontSize: 15,
+        fontSize: 14.5,
         fontWeight: 700,
         lineHeight: 1.15,
         padding: "0 10px",
         border: "1px solid #262626"
       }
-    }, t.createTpl)), lastW && /*#__PURE__*/React.createElement("div", {
+    }, t.createTpl), /*#__PURE__*/React.createElement("button", {
+      className: "press",
+      onClick: onStartPress,
+      style: {
+        flex: 1.55,
+        height: 60,
+        borderRadius: 20,
+        background: "#fff",
+        color: "#0A0A0A",
+        fontSize: 16,
+        fontWeight: 700,
+        lineHeight: 1.15,
+        padding: "0 10px"
+      }
+    }, t.start)), lastW && /*#__PURE__*/React.createElement("div", {
       className: "fadeUp",
       style: {
         marginTop: 28,
