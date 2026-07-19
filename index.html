@@ -470,7 +470,28 @@ const T = {
     addExPh: "Новое упражнение",
     add: "Добавить",
     noCustom: "Своих упражнений пока нет. Добавь — и они появятся в списке при выборе упражнения.",
-    exists: "Уже есть в списке"
+    exists: "Уже есть в списке",
+    modes: "Режимы",
+    waterMode: "Учёт выпитой воды",
+    weightMode: "Трекинг веса",
+    tabWater: "Вода",
+    tabWeight: "Вес",
+    enterWeight: "Укажи свой вес",
+    weightHint: "Нужен для расчёта дневной нормы воды. Потом его можно менять во вкладке «Вес».",
+    kgUnit: "кг",
+    mlUnit: "мл",
+    save: "Сохранить",
+    dailyGoal: "Дневная норма",
+    goalFormula: "30 мл × вес",
+    addWater: "Добавить воды",
+    customVol: "Свой объём",
+    undoLast: "Отменить последнюю",
+    tapGlass: "Тап по стакану",
+    drunkOf: "из",
+    currentWeight: "Текущий вес",
+    newEntry: "Новый замер",
+    recent: "Последние замеры",
+    weightFirst: "Начни с первого замера — он станет отправной точкой."
   },
   en: {
     locale: "en-US",
@@ -542,76 +563,108 @@ const T = {
     addExPh: "New exercise",
     add: "Add",
     noCustom: "No custom exercises yet. Add some — they will appear in the exercise picker.",
-    exists: "Already in the list"
+    exists: "Already in the list",
+    modes: "Modes",
+    waterMode: "Water intake",
+    weightMode: "Weight tracking",
+    tabWater: "Water",
+    tabWeight: "Weight",
+    enterWeight: "Enter your weight",
+    weightHint: "Used to calculate your daily water goal. You can change it later in the Weight tab.",
+    kgUnit: "kg",
+    mlUnit: "ml",
+    save: "Save",
+    dailyGoal: "Daily goal",
+    goalFormula: "30 ml × weight",
+    addWater: "Add water",
+    customVol: "Custom",
+    undoLast: "Undo last",
+    tapGlass: "Tap the glass",
+    drunkOf: "of",
+    currentWeight: "Current weight",
+    newEntry: "New entry",
+    recent: "Recent entries",
+    weightFirst: "Start with your first entry — it becomes the baseline."
   }
 };
 const tr = () => T[LANG];
 
 /* ================= ФЛАГИ ================= */
+/* Единый размер 64×44, скругления, без обводки */
 
-const FlagRU = ({
-  s = 88
-}) => /*#__PURE__*/React.createElement("svg", {
-  width: s,
-  height: s * 2 / 3,
-  viewBox: "0 0 3 2",
+const FLAG = {
+  w: 64,
+  h: 44,
+  r: 10,
+  blue: "#2F4C9B",
+  red: "#C8102E",
+  white: "#FFFFFF"
+};
+const FlagRU = () => /*#__PURE__*/React.createElement("svg", {
+  width: FLAG.w,
+  height: FLAG.h,
+  viewBox: `0 0 ${FLAG.w} ${FLAG.h}`,
   style: {
-    display: "block",
-    borderRadius: 8
-  }
-}, /*#__PURE__*/React.createElement("rect", {
-  width: "3",
-  height: "2",
-  fill: "#fff"
-}), /*#__PURE__*/React.createElement("rect", {
-  y: "0.667",
-  width: "3",
-  height: "0.667",
-  fill: "#0039A6"
-}), /*#__PURE__*/React.createElement("rect", {
-  y: "1.333",
-  width: "3",
-  height: "0.667",
-  fill: "#D52B1E"
-}));
-const FlagGB = ({
-  s = 88
-}) => /*#__PURE__*/React.createElement("svg", {
-  width: s,
-  height: s / 2,
-  viewBox: "0 0 60 30",
-  style: {
-    display: "block",
-    borderRadius: 8
+    display: "block"
   }
 }, /*#__PURE__*/React.createElement("clipPath", {
-  id: "gbclip"
+  id: "fru"
 }, /*#__PURE__*/React.createElement("rect", {
-  width: "60",
-  height: "30",
-  rx: "0"
+  width: FLAG.w,
+  height: FLAG.h,
+  rx: FLAG.r
 })), /*#__PURE__*/React.createElement("g", {
-  clipPath: "url(#gbclip)"
+  clipPath: "url(#fru)"
 }, /*#__PURE__*/React.createElement("rect", {
-  width: "60",
-  height: "30",
-  fill: "#012169"
+  width: FLAG.w,
+  height: FLAG.h,
+  fill: FLAG.white
+}), /*#__PURE__*/React.createElement("rect", {
+  y: FLAG.h / 3,
+  width: FLAG.w,
+  height: FLAG.h / 3,
+  fill: FLAG.blue
+}), /*#__PURE__*/React.createElement("rect", {
+  y: FLAG.h / 3 * 2,
+  width: FLAG.w,
+  height: FLAG.h / 3,
+  fill: FLAG.red
+})));
+const FlagGB = () => /*#__PURE__*/React.createElement("svg", {
+  width: FLAG.w,
+  height: FLAG.h,
+  viewBox: `0 0 ${FLAG.w} ${FLAG.h}`,
+  style: {
+    display: "block"
+  }
+}, /*#__PURE__*/React.createElement("clipPath", {
+  id: "fgb"
+}, /*#__PURE__*/React.createElement("rect", {
+  width: FLAG.w,
+  height: FLAG.h,
+  rx: FLAG.r
+})), /*#__PURE__*/React.createElement("g", {
+  clipPath: "url(#fgb)"
+}, /*#__PURE__*/React.createElement("rect", {
+  width: FLAG.w,
+  height: FLAG.h,
+  fill: FLAG.blue
 }), /*#__PURE__*/React.createElement("path", {
-  d: "M0,0 L60,30 M60,0 L0,30",
-  stroke: "#fff",
-  strokeWidth: "6"
+  d: `M0,0 ${FLAG.w},${FLAG.h} M${FLAG.w},0 0,${FLAG.h}`,
+  stroke: FLAG.white,
+  strokeWidth: "8"
 }), /*#__PURE__*/React.createElement("path", {
-  d: "M0,0 L60,30 M60,0 L0,30",
-  stroke: "#C8102E",
-  strokeWidth: "3.5"
+  d: `M0,0 ${FLAG.w},${FLAG.h} M${FLAG.w},0 0,${FLAG.h}`,
+  stroke: FLAG.red,
+  strokeWidth: "3.2"
 }), /*#__PURE__*/React.createElement("path", {
-  d: "M30,0 V30 M0,15 H60",
-  stroke: "#fff",
-  strokeWidth: "10"
+  d: `M${FLAG.w / 2},0 V${FLAG.h} M0,${FLAG.h / 2} H${FLAG.w}`,
+  stroke: FLAG.white,
+  strokeWidth: "14.5"
 }), /*#__PURE__*/React.createElement("path", {
-  d: "M30,0 V30 M0,15 H60",
-  stroke: "#C8102E",
-  strokeWidth: "6"
+  d: `M${FLAG.w / 2},0 V${FLAG.h} M0,${FLAG.h / 2} H${FLAG.w}`,
+  stroke: FLAG.red,
+  strokeWidth: "8.5"
 })));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const pad = n => String(n).padStart(2, "0");
@@ -810,8 +863,103 @@ const Ic = {
     strokeLinecap: "round"
   }, /*#__PURE__*/React.createElement("path", {
     d: "M4 7h16M4 12h16M4 17h16"
+  })),
+  drop: c => /*#__PURE__*/React.createElement("svg", {
+    width: "23",
+    height: "23",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: c,
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M12 3.5C12 3.5 6 10.5 6 14.5a6 6 0 0 0 12 0C18 10.5 12 3.5 12 3.5Z"
+  })),
+  scale: c => /*#__PURE__*/React.createElement("svg", {
+    width: "23",
+    height: "23",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: c,
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "4",
+    y: "4",
+    width: "16",
+    height: "16",
+    rx: "4"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M9.2 9.5a3.2 3.2 0 0 1 5.6 0"
   }))
 };
+
+/* ================= МЕРНЫЙ СТАКАН ================= */
+
+function Glass({
+  frac,
+  onTap
+}) {
+  const f = Math.max(0, Math.min(1, frac || 0));
+  const W = 160,
+    H = 196,
+    top = 8,
+    bot = 186,
+    innerH = bot - top;
+  const shape = `M28,${top} L42,${bot - 8} Q43,${bot} 52,${bot} L108,${bot} Q117,${bot} 118,${bot - 8} L132,${top}`;
+  return /*#__PURE__*/React.createElement("svg", {
+    width: W,
+    height: H,
+    viewBox: `0 0 ${W} ${H}`,
+    onClick: onTap,
+    role: "button",
+    "aria-label": "glass",
+    style: {
+      display: "block",
+      cursor: "pointer",
+      touchAction: "manipulation"
+    }
+  }, /*#__PURE__*/React.createElement("clipPath", {
+    id: "glassClip"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: `${shape} Z`
+  })), /*#__PURE__*/React.createElement("g", {
+    clipPath: "url(#glassClip)"
+  }, /*#__PURE__*/React.createElement("g", {
+    style: {
+      transform: `translateY(${(1 - f) * innerH}px)`,
+      transition: "transform .7s cubic-bezier(.22,1,.36,1)"
+    }
+  }, /*#__PURE__*/React.createElement("path", {
+    d: `M-12,${top + 7} Q 26,${top - 2} 68,${top + 7} T 172,${top + 7} L172,${H + innerH} L-12,${H + innerH} Z`,
+    fill: "#FFFFFF"
+  }))), [0.25, 0.5, 0.75].map((p, i) => {
+    const y = bot - innerH * p;
+    const xl = 28 + (132 - 28) * 0 + (bot - y) / (bot - top) * 0; // left edge slant
+    const x = 28 + 14 * (y - top) / (bot - top) + 7;
+    return /*#__PURE__*/React.createElement("line", {
+      key: i,
+      x1: x,
+      x2: x + 13,
+      y1: y,
+      y2: y,
+      stroke: f >= p ? "#0A0A0A" : "#3A3A3A",
+      strokeWidth: "2.5",
+      strokeLinecap: "round",
+      style: {
+        transition: "stroke .5s"
+      }
+    });
+  }), /*#__PURE__*/React.createElement("path", {
+    d: shape,
+    fill: "none",
+    stroke: "#4A4A4A",
+    strokeWidth: "3.5",
+    strokeLinecap: "round"
+  }));
+}
 
 /* ================= ГРАФИК ================= */
 
@@ -1200,6 +1348,19 @@ function App() {
   const [newExName, setNewExName] = useState("");
   const [delEx, setDelEx] = useState(null);
   const [exNotice, setExNotice] = useState("");
+  const [modes, setModes] = useState({
+    water: false,
+    weight: false,
+    lastMl: 200
+  });
+  const [bw, setBw] = useState([]); // [{d, v}] замеры веса, последний — текущий
+  const [wgoal, setWgoal] = useState(null); // мл
+  const [wMonth, setWMonth] = useState({}); // { "19": [200,500], ... }
+  const [addSheet, setAddSheet] = useState(false);
+  const [customMl, setCustomMl] = useState("");
+  const [goalEdit, setGoalEdit] = useState(false);
+  const [goalDraft, setGoalDraft] = useState("");
+  const [weightDraft, setWeightDraft] = useState("");
   const [expanded, setExpanded] = useState(null);
   const [delWk, setDelWk] = useState(null);
   const [selEx, setSelEx] = useState(null);
@@ -1261,6 +1422,31 @@ function App() {
           LANG = langRaw;
           setLang(langRaw);
         }
+        const modesRaw = await store.get("modes");
+        if (modesRaw) {
+          try {
+            const m = JSON.parse(modesRaw);
+            setModes({
+              water: !!m.water,
+              weight: !!m.weight,
+              lastMl: m.lastMl || 200
+            });
+          } catch (e) {}
+        }
+        const bwRaw = await store.get("bw");
+        if (bwRaw) {
+          try {
+            setBw(JSON.parse(bwRaw));
+          } catch (e) {}
+        }
+        const goalRaw = await store.get("wgoal");
+        if (goalRaw) setWgoal(parseInt(goalRaw) || null);
+        const wmRaw = await store.get("wm_" + monthKey());
+        if (wmRaw) {
+          try {
+            setWMonth(JSON.parse(wmRaw));
+          } catch (e) {}
+        }
         setData({
           workouts,
           exercises
@@ -1295,7 +1481,7 @@ function App() {
     let action = null;
     if (finish) action = () => setFinish(null);else if (pickerCtx) action = () => setPickerCtx(null);else if (exMgr) action = () => setExMgr(false);else if (menu) action = () => setMenu(false);else if (tplScreen && tplScreen.mode === "edit") action = () => setTplScreen(tpls.length ? {
       mode: "list"
-    } : null);else if (tplScreen) action = () => setTplScreen(null);else if (startSheet) action = () => setStartSheet(false);else if (workout && wOpen) action = () => setWOpen(false);
+    } : null);else if (tplScreen) action = () => setTplScreen(null);else if (addSheet) action = () => setAddSheet(false);else if (startSheet) action = () => setStartSheet(false);else if (workout && wOpen) action = () => setWOpen(false);
     if (action) {
       try {
         bb.onClick(action);
@@ -1311,7 +1497,7 @@ function App() {
     try {
       bb.hide();
     } catch (e) {}
-  }, [finish, pickerCtx, exMgr, menu, tplScreen, startSheet, workout, wOpen, tpls.length]);
+  }, [finish, pickerCtx, exMgr, menu, tplScreen, addSheet, startSheet, workout, wOpen, tpls.length]);
 
   /* ---- таймер ---- */
   useEffect(() => {
@@ -1595,6 +1781,110 @@ function App() {
     }));
     store.set("ex", JSON.stringify(next));
     setDelEx(null);
+  }
+
+  /* ---- вода и вес ---- */
+  function monthKey() {
+    const d = new Date();
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1);
+  }
+  function dayKey() {
+    return pad(new Date().getDate());
+  }
+  const round50 = v => Math.max(500, Math.round(v / 50) * 50);
+  const calcGoal = kg => round50(kg * 30);
+  const todayLog = wMonth[dayKey()] || [];
+  const todayMl = todayLog.reduce((a, b) => a + b, 0);
+  const curWeight = bw.length ? bw[bw.length - 1].v : null;
+  function toggleMode(key) {
+    haptic.light();
+    setModes(m => {
+      const next = {
+        ...m,
+        [key]: !m[key]
+      };
+      store.set("modes", JSON.stringify(next));
+      if (!next.water && tab === "water") setTab("home");
+      if (!next.weight && tab === "weight") setTab("home");
+      return next;
+    });
+  }
+  function saveWeightEntry(v) {
+    const kg = num(v);
+    if (kg < 20 || kg > 400) {
+      haptic.warn();
+      return false;
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    setBw(arr => {
+      const rest = arr.filter(x => x.d !== today);
+      const next = [...rest, {
+        d: today,
+        v: kg
+      }].slice(-100);
+      store.set("bw", JSON.stringify(next));
+      return next;
+    });
+    if (!wgoal) {
+      const g = calcGoal(kg);
+      setWgoal(g);
+      store.set("wgoal", String(g));
+    }
+    setWeightDraft("");
+    haptic.success();
+    return true;
+  }
+  function addWaterMl(ml) {
+    const v = Math.round(num(ml));
+    if (v <= 0 || v > 5000) {
+      haptic.warn();
+      return;
+    }
+    const dk = dayKey();
+    setWMonth(m => {
+      const next = {
+        ...m,
+        [dk]: [...(m[dk] || []), v]
+      };
+      store.set("wm_" + monthKey(), JSON.stringify(next));
+      return next;
+    });
+    setModes(m => {
+      const next = {
+        ...m,
+        lastMl: v
+      };
+      store.set("modes", JSON.stringify(next));
+      return next;
+    });
+    haptic.light();
+    setAddSheet(false);
+    setCustomMl("");
+  }
+  function undoWater() {
+    const dk = dayKey();
+    setWMonth(m => {
+      const log = m[dk] || [];
+      if (!log.length) return m;
+      const next = {
+        ...m,
+        [dk]: log.slice(0, -1)
+      };
+      store.set("wm_" + monthKey(), JSON.stringify(next));
+      return next;
+    });
+    haptic.light();
+  }
+  function saveGoal() {
+    const g = Math.round(num(goalDraft));
+    if (g < 300 || g > 8000) {
+      haptic.warn();
+      return;
+    }
+    setWgoal(g);
+    store.set("wgoal", String(g));
+    setGoalEdit(false);
+    haptic.light();
   }
   const mutEntry = (eid, fn) => setWorkout(wk => ({
     ...wk,
@@ -2322,6 +2612,461 @@ function App() {
     }
   }, label))), progMode === "months" ? renderMonths() : renderExercises()));
 
+  /* ---- первичный ввод веса (общий блок) ---- */
+  const renderWeightAsk = hint => /*#__PURE__*/React.createElement("div", {
+    className: "fadeUp",
+    style: {
+      background: "#161616",
+      borderRadius: 20,
+      padding: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 17,
+      fontWeight: 800,
+      letterSpacing: "-0.02em"
+    }
+  }, t.enterWeight), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: "#8A8A8A",
+      lineHeight: 1.5,
+      margin: "8px 0 14px"
+    }
+  }, hint), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "fld fldD num",
+    inputMode: "decimal",
+    placeholder: "70",
+    value: weightDraft,
+    onChange: e => setWeightDraft(e.target.value),
+    onKeyDown: e => {
+      if (e.key === "Enter") saveWeightEntry(weightDraft);
+    },
+    style: {
+      flex: 1,
+      height: 52,
+      borderRadius: 14,
+      fontSize: 20,
+      fontWeight: 700
+    },
+    "aria-label": t.kgUnit
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "#8A8A8A",
+      fontSize: 15,
+      fontWeight: 600
+    }
+  }, t.kgUnit), /*#__PURE__*/React.createElement("button", {
+    className: "press",
+    onClick: () => saveWeightEntry(weightDraft),
+    style: {
+      height: 52,
+      padding: "0 20px",
+      borderRadius: 14,
+      background: "#fff",
+      color: "#0A0A0A",
+      fontSize: 15,
+      fontWeight: 700,
+      opacity: num(weightDraft) > 0 ? 1 : 0.4,
+      transition: "opacity .2s",
+      flexShrink: 0
+    }
+  }, t.save)));
+
+  /* ---- вкладка Вода ---- */
+  const renderWater = () => {
+    const frac = wgoal ? todayMl / wgoal : 0;
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "0 20px"
+      }
+    }, /*#__PURE__*/React.createElement("h1", {
+      className: "fadeUp",
+      style: {
+        fontSize: 32,
+        fontWeight: 800,
+        letterSpacing: "-0.03em",
+        margin: "20px 0 16px"
+      }
+    }, t.tabWater), !curWeight && !wgoal ? renderWeightAsk(t.weightHint) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      className: "fadeUp",
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center"
+      }
+    }, /*#__PURE__*/React.createElement(Glass, {
+      frac: frac,
+      onTap: () => addWaterMl(modes.lastMl)
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "#6E6E6E",
+        marginTop: 6
+      }
+    }, t.tapGlass, " \u2014 +", modes.lastMl, " ", t.mlUnit), /*#__PURE__*/React.createElement("div", {
+      className: "num",
+      style: {
+        marginTop: 14,
+        fontSize: 30,
+        fontWeight: 800,
+        letterSpacing: "-0.02em"
+      }
+    }, todayMl.toLocaleString(t.locale), " ", /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "#8A8A8A",
+        fontSize: 17,
+        fontWeight: 600
+      }
+    }, t.drunkOf, " ", (wgoal || 0).toLocaleString(t.locale), " ", t.mlUnit)), /*#__PURE__*/React.createElement("div", {
+      className: "num",
+      style: {
+        fontSize: 13,
+        color: frac >= 1 ? "#fff" : "#8A8A8A",
+        fontWeight: 700,
+        marginTop: 4
+      }
+    }, Math.round(frac * 100), "%")), /*#__PURE__*/React.createElement("div", {
+      className: "fadeUp",
+      style: {
+        background: "#161616",
+        borderRadius: 18,
+        padding: "14px 16px",
+        marginTop: 18,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 10,
+        animationDelay: "80ms"
+      }
+    }, goalEdit ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("input", {
+      className: "fld fldD num",
+      inputMode: "numeric",
+      value: goalDraft,
+      onChange: e => setGoalDraft(e.target.value),
+      onKeyDown: e => {
+        if (e.key === "Enter") saveGoal();
+      },
+      style: {
+        flex: 1,
+        height: 44
+      },
+      "aria-label": t.mlUnit
+    }), /*#__PURE__*/React.createElement("button", {
+      className: "press",
+      onClick: saveGoal,
+      style: {
+        height: 44,
+        padding: "0 16px",
+        borderRadius: 12,
+        background: "#fff",
+        color: "#0A0A0A",
+        fontSize: 14,
+        fontWeight: 700,
+        flexShrink: 0
+      }
+    }, t.save)) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 14,
+        fontWeight: 700
+      }
+    }, t.dailyGoal), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: "#8A8A8A",
+        marginTop: 2
+      }
+    }, t.goalFormula, curWeight ? ` · ${fmtKg(curWeight)} ${t.kgUnit}` : "")), /*#__PURE__*/React.createElement("button", {
+      className: "press num",
+      onClick: () => {
+        setGoalDraft(String(wgoal || ""));
+        setGoalEdit(true);
+      },
+      style: {
+        fontSize: 17,
+        fontWeight: 800,
+        background: "#242424",
+        borderRadius: 12,
+        padding: "10px 14px",
+        flexShrink: 0,
+        color: "#fff"
+      }
+    }, (wgoal || 0).toLocaleString(t.locale), " ", t.mlUnit, " ", /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "#8A8A8A",
+        fontWeight: 400
+      }
+    }, "\u270E")))), /*#__PURE__*/React.createElement("button", {
+      className: "press fadeUp",
+      onClick: () => setAddSheet(true),
+      style: {
+        width: "100%",
+        height: 58,
+        marginTop: 14,
+        borderRadius: 20,
+        background: "#fff",
+        color: "#0A0A0A",
+        fontSize: 16,
+        fontWeight: 700,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        animationDelay: "140ms"
+      }
+    }, Ic.plus("#0A0A0A", 16), " ", t.addWater), todayLog.length > 0 && /*#__PURE__*/React.createElement("button", {
+      className: "press fadeIn",
+      onClick: undoWater,
+      style: {
+        width: "100%",
+        height: 42,
+        marginTop: 4,
+        fontSize: 13,
+        fontWeight: 600,
+        color: "#6E6E6E"
+      }
+    }, "\u2212 ", t.undoLast, " (", todayLog[todayLog.length - 1], " ", t.mlUnit, ")")));
+  };
+
+  /* ---- шторка добавления воды ---- */
+  const renderAddSheet = () => /*#__PURE__*/React.createElement("div", {
+    className: "fadeIn",
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 58,
+      background: "rgba(0,0,0,0.6)",
+      display: "flex",
+      alignItems: "flex-end"
+    },
+    onClick: () => setAddSheet(false)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sheet",
+    onClick: e => e.stopPropagation(),
+    style: {
+      background: "#141414",
+      width: "100%",
+      borderRadius: "24px 24px 0 0",
+      padding: "22px 20px calc(20px + env(safe-area-inset-bottom))"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 20,
+      fontWeight: 800,
+      letterSpacing: "-0.02em",
+      marginBottom: 14
+    }
+  }, t.addWater), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr 1fr",
+      gap: 10
+    }
+  }, [200, 300, 330, 500, 1000].map(v => /*#__PURE__*/React.createElement("button", {
+    key: v,
+    className: "press num",
+    onClick: () => addWaterMl(v),
+    style: {
+      height: 56,
+      borderRadius: 16,
+      background: "#1E1E1E",
+      fontSize: 16,
+      fontWeight: 700,
+      color: "#fff"
+    }
+  }, v >= 1000 ? "1 " + (lang === "ru" ? "л" : "L") : v + " " + t.mlUnit)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "fld fldD num",
+    inputMode: "numeric",
+    placeholder: t.customVol,
+    value: customMl,
+    onChange: e => setCustomMl(e.target.value),
+    onKeyDown: e => {
+      if (e.key === "Enter") addWaterMl(customMl);
+    },
+    style: {
+      height: 56,
+      borderRadius: 16,
+      fontSize: 15,
+      minWidth: 0
+    },
+    "aria-label": t.customVol
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "press",
+    onClick: () => addWaterMl(customMl),
+    style: {
+      width: 44,
+      height: 56,
+      borderRadius: 16,
+      background: "#fff",
+      flexShrink: 0,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    },
+    "aria-label": t.add
+  }, Ic.plus("#0A0A0A", 16))))));
+
+  /* ---- вкладка Вес ---- */
+  const renderWeight = () => /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "0 20px"
+    }
+  }, /*#__PURE__*/React.createElement("h1", {
+    className: "fadeUp",
+    style: {
+      fontSize: 32,
+      fontWeight: 800,
+      letterSpacing: "-0.03em",
+      margin: "20px 0 16px"
+    }
+  }, t.tabWeight), !curWeight ? renderWeightAsk(t.weightFirst) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "fadeUp",
+    style: {
+      background: "#161616",
+      borderRadius: 20,
+      padding: "20px 18px",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: "0.12em",
+      color: "#8A8A8A",
+      textTransform: "uppercase"
+    }
+  }, t.currentWeight), /*#__PURE__*/React.createElement("div", {
+    className: "num",
+    style: {
+      fontSize: 44,
+      fontWeight: 800,
+      letterSpacing: "-0.03em",
+      marginTop: 6
+    }
+  }, fmtKg(curWeight), " ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 20,
+      color: "#8A8A8A",
+      fontWeight: 600
+    }
+  }, t.kgUnit)), /*#__PURE__*/React.createElement("div", {
+    className: "num",
+    style: {
+      fontSize: 12,
+      color: "#6E6E6E",
+      marginTop: 4
+    }
+  }, fmtDate(bw[bw.length - 1].d))), /*#__PURE__*/React.createElement("div", {
+    className: "fadeUp",
+    style: {
+      marginTop: 14,
+      animationDelay: "70ms"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: "0.12em",
+      color: "#8A8A8A",
+      textTransform: "uppercase",
+      marginBottom: 8
+    }
+  }, t.newEntry), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "fld fldD num",
+    inputMode: "decimal",
+    placeholder: fmtKg(curWeight),
+    value: weightDraft,
+    onChange: e => setWeightDraft(e.target.value),
+    onKeyDown: e => {
+      if (e.key === "Enter") saveWeightEntry(weightDraft);
+    },
+    style: {
+      flex: 1,
+      height: 52,
+      borderRadius: 14,
+      fontSize: 18,
+      fontWeight: 700
+    },
+    "aria-label": t.kgUnit
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "press",
+    onClick: () => saveWeightEntry(weightDraft),
+    style: {
+      height: 52,
+      padding: "0 20px",
+      borderRadius: 14,
+      background: "#fff",
+      color: "#0A0A0A",
+      fontSize: 15,
+      fontWeight: 700,
+      opacity: num(weightDraft) > 0 ? 1 : 0.4,
+      transition: "opacity .2s"
+    }
+  }, t.save))), bw.length > 1 && /*#__PURE__*/React.createElement("div", {
+    className: "fadeUp",
+    style: {
+      marginTop: 20,
+      animationDelay: "130ms"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: "0.12em",
+      color: "#8A8A8A",
+      textTransform: "uppercase",
+      marginBottom: 8
+    }
+  }, t.recent), [...bw].slice(-6).reverse().map((e, i) => {
+    const idx = bw.length - 1 - i;
+    const prev = bw[idx - 1];
+    const diff = prev ? e.v - prev.v : 0;
+    return /*#__PURE__*/React.createElement("div", {
+      key: e.d,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        height: 46,
+        borderBottom: "1px solid #1F1F1F"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 14,
+        color: "#B5B5B5"
+      }
+    }, fmtDate(e.d)), /*#__PURE__*/React.createElement("div", {
+      className: "num",
+      style: {
+        fontSize: 15,
+        fontWeight: 700
+      }
+    }, fmtKg(e.v), " ", t.kgUnit, prev && diff !== 0 && /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "#8A8A8A",
+        fontWeight: 500,
+        fontSize: 12,
+        marginLeft: 8
+      }
+    }, diff > 0 ? "+" : "−", fmtKg(Math.abs(diff)))));
+  }))));
+
   /* ---- меню ---- */
   const renderMenu = () => /*#__PURE__*/React.createElement("div", {
     className: "sheet",
@@ -2393,23 +3138,77 @@ function App() {
         background: on ? "#1E1E1E" : "#141414",
         border: on ? "2px solid #fff" : "2px solid #242424",
         borderRadius: 18,
-        padding: "18px 0",
+        padding: "16px 0",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: 10,
+        gap: 9,
         transition: "border-color .2s, background .2s"
       }
-    }, /*#__PURE__*/React.createElement(Flag, {
-      s: 92
-    }), /*#__PURE__*/React.createElement("span", {
+    }, /*#__PURE__*/React.createElement(Flag, null), /*#__PURE__*/React.createElement("span", {
       style: {
-        fontSize: 14,
+        fontSize: 13.5,
         fontWeight: 700,
         color: on ? "#fff" : "#8A8A8A"
       }
     }, id === "ru" ? "Русский" : "English"));
-  })), /*#__PURE__*/React.createElement("button", {
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: "0.12em",
+      textTransform: "uppercase",
+      color: "#6E6E6E",
+      margin: "24px 0 12px"
+    }
+  }, t.modes), [["water", t.waterMode], ["weight", t.weightMode]].map(([key, label]) => {
+    const on = modes[key];
+    return /*#__PURE__*/React.createElement("button", {
+      key: key,
+      className: "press",
+      onClick: () => toggleMode(key),
+      style: {
+        width: "100%",
+        background: "#161616",
+        borderRadius: 18,
+        padding: "15px 18px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 10,
+        textAlign: "left"
+      },
+      "aria-pressed": on
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 15,
+        fontWeight: 700,
+        color: on ? "#fff" : "#B5B5B5"
+      }
+    }, label), /*#__PURE__*/React.createElement("span", {
+      style: {
+        width: 46,
+        height: 28,
+        borderRadius: 999,
+        background: on ? "#fff" : "#2A2A2A",
+        position: "relative",
+        display: "inline-block",
+        flexShrink: 0,
+        transition: "background .22s"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        position: "absolute",
+        top: 3,
+        left: on ? 21 : 3,
+        width: 22,
+        height: 22,
+        borderRadius: 999,
+        background: on ? "#0A0A0A" : "#777",
+        transition: "left .22s cubic-bezier(.34,1.56,.64,1), background .22s"
+      }
+    })));
+  }), /*#__PURE__*/React.createElement("button", {
     className: "press",
     onClick: () => {
       setExMgr(true);
@@ -2417,7 +3216,7 @@ function App() {
     },
     style: {
       width: "100%",
-      marginTop: 22,
+      marginTop: 12,
       background: "#161616",
       borderRadius: 18,
       padding: "16px 18px",
@@ -3315,7 +4114,7 @@ function App() {
   }, t.great));
 
   /* ---- каркас ---- */
-  const TABS = [["home", t.tabHome, Ic.home], ["hist", t.tabHist, Ic.hist], ["prog", t.tabProg, Ic.chart]];
+  const TABS = [["home", t.tabHome, Ic.home], ...(modes.water ? [["water", t.tabWater, Ic.drop]] : []), ...(modes.weight ? [["weight", t.tabWeight, Ic.scale]] : []), ["hist", t.tabHist, Ic.hist], ["prog", t.tabProg, Ic.chart]];
   return /*#__PURE__*/React.createElement("div", {
     className: "root",
     style: {
@@ -3333,7 +4132,7 @@ function App() {
       paddingBottom: 20
     },
     key: tab + lang
-  }, tab === "home" && renderHome(), tab === "hist" && renderHist(), tab === "prog" && renderProg()), workout && !wOpen && /*#__PURE__*/React.createElement("button", {
+  }, tab === "home" && renderHome(), tab === "water" && renderWater(), tab === "weight" && renderWeight(), tab === "hist" && renderHist(), tab === "prog" && renderProg()), workout && !wOpen && /*#__PURE__*/React.createElement("button", {
     className: "press pop",
     onClick: () => setWOpen(true),
     style: {
@@ -3386,7 +4185,7 @@ function App() {
       fontWeight: 600,
       color: tab === id ? "#fff" : "#5A5A5A"
     }
-  }, label)))), startSheet && renderStartSheet(), tplScreen && tplScreen.mode === "list" && renderTplList(), tplScreen && tplScreen.mode === "edit" && renderTplEdit(), menu && renderMenu(), exMgr && renderExMgr(), workout && wOpen && renderWorkout(), pickerCtx && /*#__PURE__*/React.createElement(Picker, {
+  }, label)))), addSheet && renderAddSheet(), startSheet && renderStartSheet(), tplScreen && tplScreen.mode === "list" && renderTplList(), tplScreen && tplScreen.mode === "edit" && renderTplEdit(), menu && renderMenu(), exMgr && renderExMgr(), workout && wOpen && renderWorkout(), pickerCtx && /*#__PURE__*/React.createElement(Picker, {
     custom: data.exercises,
     onPick: addExercise,
     onCreate: createExercise,
