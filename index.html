@@ -491,7 +491,16 @@ const T = {
     currentWeight: "Текущий вес",
     newEntry: "Новый замер",
     recent: "Последние замеры",
-    weightFirst: "Начни с первого замера — он станет отправной точкой."
+    weightFirst: "Начни с первого замера — он станет отправной точкой.",
+    bodyAsk: "Рост и возраст",
+    bodyHint: "Нужны для расчёта индекса массы тела (ИМТ).",
+    heightPh: "Рост",
+    cm: "см",
+    agePh: "Возраст",
+    yrs: "лет",
+    bmi: "ИМТ",
+    bmiCats: ["Недостаток веса", "Норма", "Избыточный вес", "Ожирение"],
+    trend: "Динамика"
   },
   en: {
     locale: "en-US",
@@ -584,7 +593,16 @@ const T = {
     currentWeight: "Current weight",
     newEntry: "New entry",
     recent: "Recent entries",
-    weightFirst: "Start with your first entry — it becomes the baseline."
+    weightFirst: "Start with your first entry — it becomes the baseline.",
+    bodyAsk: "Height & age",
+    bodyHint: "Used to calculate your body mass index (BMI).",
+    heightPh: "Height",
+    cm: "cm",
+    agePh: "Age",
+    yrs: "y.o.",
+    bmi: "BMI",
+    bmiCats: ["Underweight", "Normal", "Overweight", "Obesity"],
+    trend: "Trend"
   }
 };
 const tr = () => T[LANG];
@@ -1361,6 +1379,10 @@ function App() {
   const [goalEdit, setGoalEdit] = useState(false);
   const [goalDraft, setGoalDraft] = useState("");
   const [weightDraft, setWeightDraft] = useState("");
+  const [body, setBody] = useState(null); // {h: см, a: лет}
+  const [bodyEdit, setBodyEdit] = useState(false);
+  const [hDraft, setHDraft] = useState("");
+  const [aDraft, setADraft] = useState("");
   const [expanded, setExpanded] = useState(null);
   const [delWk, setDelWk] = useState(null);
   const [selEx, setSelEx] = useState(null);
@@ -1437,6 +1459,12 @@ function App() {
         if (bwRaw) {
           try {
             setBw(JSON.parse(bwRaw));
+          } catch (e) {}
+        }
+        const bodyRaw = await store.get("body");
+        if (bodyRaw) {
+          try {
+            setBody(JSON.parse(bodyRaw));
           } catch (e) {}
         }
         const goalRaw = await store.get("wgoal");
@@ -1886,6 +1914,26 @@ function App() {
     setGoalEdit(false);
     haptic.light();
   }
+  function saveBody() {
+    const h = Math.round(num(hDraft)),
+      a = Math.round(num(aDraft));
+    if (h < 100 || h > 250 || a < 5 || a > 120) {
+      haptic.warn();
+      return;
+    }
+    const b = {
+      h,
+      a
+    };
+    setBody(b);
+    store.set("body", JSON.stringify(b));
+    setBodyEdit(false);
+    setHDraft("");
+    setADraft("");
+    haptic.success();
+  }
+  const bmiVal = body && curWeight ? curWeight / Math.pow(body.h / 100, 2) : null;
+  const bmiCat = v => v < 18.5 ? 0 : v < 25 ? 1 : v < 30 ? 2 : 3;
   const mutEntry = (eid, fn) => setWorkout(wk => ({
     ...wk,
     entries: wk.entries.map(e => e.id === eid ? fn(e) : e)
@@ -2967,7 +3015,172 @@ function App() {
       color: "#6E6E6E",
       marginTop: 4
     }
-  }, fmtDate(bw[bw.length - 1].d))), /*#__PURE__*/React.createElement("div", {
+  }, fmtDate(bw[bw.length - 1].d))), !body || bodyEdit ? /*#__PURE__*/React.createElement("div", {
+    className: "fadeUp",
+    style: {
+      background: "#161616",
+      borderRadius: 20,
+      padding: 18,
+      marginTop: 14,
+      animationDelay: "60ms"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 16,
+      fontWeight: 800,
+      letterSpacing: "-0.02em"
+    }
+  }, t.bodyAsk), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: "#8A8A8A",
+      lineHeight: 1.5,
+      margin: "6px 0 12px"
+    }
+  }, t.bodyHint), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "fld fldD num",
+    inputMode: "numeric",
+    placeholder: t.heightPh,
+    value: hDraft,
+    onChange: e => setHDraft(e.target.value),
+    style: {
+      flex: 1,
+      height: 50,
+      borderRadius: 14
+    },
+    "aria-label": t.heightPh
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "#8A8A8A",
+      fontSize: 13,
+      fontWeight: 600
+    }
+  }, t.cm), /*#__PURE__*/React.createElement("input", {
+    className: "fld fldD num",
+    inputMode: "numeric",
+    placeholder: t.agePh,
+    value: aDraft,
+    onChange: e => setADraft(e.target.value),
+    onKeyDown: e => {
+      if (e.key === "Enter") saveBody();
+    },
+    style: {
+      flex: 1,
+      height: 50,
+      borderRadius: 14
+    },
+    "aria-label": t.agePh
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "#8A8A8A",
+      fontSize: 13,
+      fontWeight: 600
+    }
+  }, t.yrs)), /*#__PURE__*/React.createElement("button", {
+    className: "press",
+    onClick: saveBody,
+    style: {
+      width: "100%",
+      height: 48,
+      marginTop: 12,
+      borderRadius: 14,
+      background: "#fff",
+      color: "#0A0A0A",
+      fontSize: 15,
+      fontWeight: 700,
+      opacity: num(hDraft) > 0 && num(aDraft) > 0 ? 1 : 0.4,
+      transition: "opacity .2s"
+    }
+  }, t.save)) : /*#__PURE__*/React.createElement("div", {
+    className: "fadeUp",
+    style: {
+      background: "#161616",
+      borderRadius: 20,
+      padding: "16px 18px",
+      marginTop: 14,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      animationDelay: "60ms"
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: "0.12em",
+      color: "#8A8A8A",
+      textTransform: "uppercase"
+    }
+  }, t.bmi), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      fontWeight: 700,
+      marginTop: 4
+    }
+  }, t.bmiCats[bmiCat(bmiVal)]), /*#__PURE__*/React.createElement("div", {
+    className: "num",
+    style: {
+      fontSize: 12,
+      color: "#6E6E6E",
+      marginTop: 2
+    }
+  }, body.h, " ", t.cm, " \xB7 ", body.a, " ", t.yrs)), /*#__PURE__*/React.createElement("button", {
+    className: "press num",
+    onClick: () => {
+      setHDraft(String(body.h));
+      setADraft(String(body.a));
+      setBodyEdit(true);
+    },
+    style: {
+      fontSize: 24,
+      fontWeight: 800,
+      background: "#242424",
+      borderRadius: 14,
+      padding: "12px 16px",
+      flexShrink: 0,
+      color: "#fff",
+      letterSpacing: "-0.02em"
+    }
+  }, (Math.round(bmiVal * 10) / 10).toLocaleString(t.locale), " ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#8A8A8A",
+      fontWeight: 400,
+      fontSize: 15
+    }
+  }, "\u270E"))), bw.length > 1 && /*#__PURE__*/React.createElement("div", {
+    className: "fadeUp",
+    style: {
+      marginTop: 14,
+      animationDelay: "100ms"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: "0.12em",
+      color: "#8A8A8A",
+      textTransform: "uppercase",
+      marginBottom: 8
+    }
+  }, t.trend), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#161616",
+      borderRadius: 20,
+      padding: "16px 10px 10px"
+    }
+  }, /*#__PURE__*/React.createElement(Chart, {
+    pts: bw.slice(-15).map(e => ({
+      date: e.d,
+      v: e.v
+    })),
+    unit: t.kgUnit
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "fadeUp",
     style: {
       marginTop: 14,
