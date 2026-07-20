@@ -4536,7 +4536,7 @@ function App() {
   }, t.great));
 
   /* ---- каркас ---- */
-  const TABS = [["home", t.tabHome, Ic.home], ...(modes.water ? [["water", t.tabWater, Ic.drop]] : []), ...(modes.weight ? [["weight", t.tabWeight, Ic.scale]] : []), ["hist", t.tabHist, Ic.hist], ["prog", t.tabProg, Ic.chart]];
+  const TABS = [...(modes.water ? [["water", t.tabWater, Ic.drop]] : []), ...(modes.weight ? [["weight", t.tabWeight, Ic.scale]] : []), ["home", t.tabHome, Ic.home], ["hist", t.tabHist, Ic.hist], ["prog", t.tabProg, Ic.chart]];
   const tabIds = TABS.map(x => x[0]);
   const swipeBlocked = !!(menu || exMgr || tplScreen || startSheet || addSheet || pickerCtx || finish || workout && wOpen);
   function goTab(id) {
